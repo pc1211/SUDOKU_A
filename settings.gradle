@@ -1,0 +1,2 @@
+include ':app', ':pekislib'
+project(':pekislib').projectDir=new File(rootDir,'../PEKISLIB_A/pekislib')
