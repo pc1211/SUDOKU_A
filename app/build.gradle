@@ -16,6 +16,7 @@ def vcStamp() {
 
 android {
     compileSdkVersion 28
+    buildToolsVersion '28.0.3'
     defaultConfig {
         applicationId "com.example.pgyl.sudoku_a"
         minSdkVersion 23
