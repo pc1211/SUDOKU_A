@@ -43,79 +43,29 @@ public class CellsHandler {
         return lastUnprotectedCellIndex;
     }
 
-    public void linkPreviouslyProtectedCell(int index) {
-        int i = index;
-        while (cells[i].isProtected()) {
-            i = i - 1;
-        }
-        if (i >= 0) {
-            cells[i].nextUnprotectedCellIndex = index;
-            cells[index].previousUnprotectedCellIndex = i;
-        } else {
-            firstUnprotectedCellIndex = index;
-        }
-        i = index;
-        while (cells[i].isProtected()) {
-            i = i + 1;
-        }
-        if (i < gridSize) {
-            cells[i].previousUnprotectedCellIndex = index;
-            cells[index].previousUnprotectedCellIndex = i;
-        } else {
-            lastUnprotectedCellIndex = index;
-        }
-    }
-
-    public void unlinkPreviouslyUnprotectedCell(int index) {
-        if (index != lastUnprotectedCellIndex) {
-            int j = cells[index].nextUnprotectedCellIndex;
-            if (index != firstUnprotectedCellIndex) {
-                int i = cells[index].previousUnprotectedCellIndex;
-                cells[i].nextUnprotectedCellIndex = j;
-                cells[j].previousUnprotectedCellIndex = i;
-            } else {
-                firstUnprotectedCellIndex = j;
-            }
-        } else {
-            if (index != firstUnprotectedCellIndex) {
-                int i = cells[index].previousUnprotectedCellIndex;
-                lastUnprotectedCellIndex = i;
-            } else {
-                firstUnprotectedCellIndex = -1;
-                lastUnprotectedCellIndex = gridSize;
-            }
-        }
-        cells[index].previousUnprotectedCellIndex = 0;   //  Pas nécessaire mais plus propre
-        cells[index].nextUnprotectedCellIndex = 0;
-    }
-
-    public void emptyCell(int index) {
-        if (cells[index].isProtected()) {
-            linkPreviouslyProtectedCell(index);
-        }
-        cells[index].empty();
-    }
-
     public void deleteAllExceptProtectedCells() {
         for (int i = 0; i <= (gridSize - 1); i = i + 1) {
             if (!cells[i].isProtected()) {
-                emptyCell(i);
+                cells[i].empty();
             }
         }
+        linkCells();
     }
 
     public void deleteAllExceptPermanentCells() {
         for (int i = 0; i <= (gridSize - 1); i = i + 1) {
             if (!cells[i].isProtectedPermanently()) {
-                emptyCell(i);
+                cells[i].empty();
             }
         }
+        linkCells();
     }
 
     public void deleteAllCells() {
         for (int i = 0; i <= (gridSize - 1); i = i + 1) {
-            emptyCell(i);
+            cells[i].empty();
         }
+        linkCells();
     }
 
     public void setTemporaryCellsToPermanent() {
@@ -144,12 +94,11 @@ public class CellsHandler {
                 i = i + 1;
             }
             if (i < gridSize) {
-                if (firstUnprotectedCellIndex == -1) {
-                    firstUnprotectedCellIndex = i;
-                }
                 if (lastCellIndex != -1) {
                     cells[lastCellIndex].nextUnprotectedCellIndex = i;
                     cells[i].previousUnprotectedCellIndex = lastCellIndex;
+                } else {
+                    firstUnprotectedCellIndex = i;
                 }
                 lastCellIndex = i;
                 i = i + 1;

@@ -141,13 +141,10 @@ public class MainActivity extends Activity {
                     if (input.length() >= 1) {
                         cells[editPointer].value = Integer.parseInt(input);
                         if (!cells[editPointer].isProtected()) {
-                            cellsHandler.unlinkPreviouslyUnprotectedCell(editPointer);
                             cells[editPointer].protectTemporarily();
                         }
                     } else {
-                        if (!cells[editPointer].isEmpty()) {
-                            cellsHandler.emptyCell(editPointer);
-                        }
+                        cells[editPointer].empty();
                     }
                     cellsHandler.deleteAllExceptProtectedCells();
                     reset();

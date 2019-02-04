@@ -72,12 +72,12 @@ public class Solver {
     public void solve() {
         boolean cellUnique;
         boolean digitOverflow;
-        boolean cellIndexOverflow;
+        boolean pointerOverflow;
 
         if (!solveState.equals(SOLVE_STATES.IMPOSSIBLE)) {
             solveState = SOLVE_STATES.UNKNOWN;
             do {
-                cellIndexOverflow = false;
+                pointerOverflow = false;
                 if (!cells[pointer].isEmpty()) {
                     freeDigitRoom(pointer);
                 }
@@ -102,18 +102,18 @@ public class Solver {
                     if (pointer != cellsHandler.getLastUnprotectedCellIndex()) {
                         pointer = cells[pointer].nextUnprotectedCellIndex;
                     } else {
-                        cellIndexOverflow = true;
+                        pointerOverflow = true;
                     }
                 } else {
-                    cellsHandler.emptyCell(pointer);
+                    cells[pointer].empty();
                     if (pointer != cellsHandler.getFirstUnprotectedCellIndex()) {
                         pointer = cells[pointer].previousUnprotectedCellIndex;
                     } else {
                         solveState = SOLVE_STATES.IMPOSSIBLE;
                     }
                 }
-            } while ((!cellIndexOverflow) && (!solveState.equals(SOLVE_STATES.IMPOSSIBLE)));
-            if (cellIndexOverflow) {
+            } while ((!pointerOverflow) && (!solveState.equals(SOLVE_STATES.IMPOSSIBLE)));
+            if (pointerOverflow) {
                 pointer = cellsHandler.getLastUnprotectedCellIndex();
                 solveState = SOLVE_STATES.SOLUTION_FOUND;
             }
