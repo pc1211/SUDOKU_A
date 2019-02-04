@@ -1,6 +1,7 @@
 package com.example.pgyl.sudoku_a;
 
 public class Cell {
+    //region Constantes
     private enum STATUS {
         UNPROTECTED, PROTECTED_TEMPORARILY, PROTECTED_PERMANENTLY;
 
@@ -10,41 +11,47 @@ public class Cell {
     }
 
     private final int CELL_DEFAULT_VALUE = 0;
+    //endregion
 
-    private int pointer;
-    private int value;
+    //region Variables
+    public int pointer;
+    public int value;
     private int status;
+    public int rowDigitRoomIndex;
+    public int colDigitRoomIndex;
+    public int squareDigitRoomIndex;
+    public int nextUnprotectedCellIndex;
+    public int previousUnprotectedCellIndex;
+    //endregion
 
     public Cell(int pointer) {
         this.pointer = pointer;
-        delete();
+        empty();
+        init();
     }
 
     public Cell(int pointer, int value, int status) {
         this.pointer = pointer;
         this.value = value;
         this.status = status;
+        init();
     }
 
-    public int getPointer() {
-        return pointer;
+    private void init() {
+        rowDigitRoomIndex = 0;
+        colDigitRoomIndex = 0;
+        squareDigitRoomIndex = 0;
+        nextUnprotectedCellIndex = 0;
+        previousUnprotectedCellIndex = 0;
     }
 
-    public int getValue() {
-        return value;
-    }
-
-    public void setValue(int value) {
-        this.value = value;
-    }
-
-    public void delete() {
-        setValue(CELL_DEFAULT_VALUE);
+    public void empty() {
+        value = CELL_DEFAULT_VALUE;
         unprotect();
     }
 
     public boolean isEmpty() {
-        return ((value == CELL_DEFAULT_VALUE) && (status == STATUS.UNPROTECTED.getValue()));
+        return ((value == CELL_DEFAULT_VALUE) && (!isProtected()));
     }
 
     public int getStatus() {

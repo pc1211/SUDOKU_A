@@ -81,8 +81,8 @@ public class StringShelfDatabaseUtils {
 
     public static String[] cellToCellRow(Cell cell) {
         String[] ret = new String[1 + TABLE_CELLS_DATA_FIELDS.values().length];  //  Champ ID + Données
-        ret[TABLE_ID_INDEX] = CELL_ID + String.valueOf(cell.getPointer());   //  => CELL1, CELL2, CELL3, ...
-        ret[TABLE_CELLS_DATA_FIELDS.VALUE.INDEX()] = String.valueOf(cell.getValue());
+        ret[TABLE_ID_INDEX] = CELL_ID + String.valueOf(cell.pointer);   //  => CELL1, CELL2, CELL3, ...
+        ret[TABLE_CELLS_DATA_FIELDS.VALUE.INDEX()] = String.valueOf(cell.value);
         ret[TABLE_CELLS_DATA_FIELDS.STATUS.INDEX()] = String.valueOf(cell.getStatus());
         return ret;
     }
@@ -94,7 +94,7 @@ public class StringShelfDatabaseUtils {
         if (cellRows != null) {
             for (int i = 0; i <= (cellRows.length - 1); i = i + 1) {
                 cell = cellRowToCell(cellRows[i]);
-                ret[cell.getPointer()] = cell;    //   la position de cell dans ret doit être celle fixée par cell.getPointer()
+                ret[cell.pointer] = cell;    //   la position de cell dans ret doit être celle fixée par cell.getPointer()
             }
             cell = null;
         }

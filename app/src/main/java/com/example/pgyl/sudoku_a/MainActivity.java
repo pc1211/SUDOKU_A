@@ -56,20 +56,20 @@ public class MainActivity extends Activity {
         }
     }
 
-    public enum SUDOKU_SHP_KEY_NAMES {KEEP_SCREEN, SOLUTION_ERROR, POINTER, EDIT_POINTER}
+    public enum SUDOKU_SHP_KEY_NAMES {KEEP_SCREEN, SOLVE_STATE, POINTER, EDIT_POINTER}
 
-    private enum SOLVE_STATES {UNKNOWN, SOLUTION_FOUND, IMPOSSIBLE}
+    public enum SOLVE_STATES {UNKNOWN, SOLUTION_FOUND, IMPOSSIBLE}
 
     private final int SQUARE_ROWS = 3;
     private final int GRID_ROWS = SQUARE_ROWS * SQUARE_ROWS;
-    private final int SQUARE_STRIP_SIZE = SQUARE_ROWS * GRID_ROWS;
     private final int GRID_SIZE = GRID_ROWS * GRID_ROWS;
-    private final int POINTER_DEFAULT_VALUE = 0;
     //endregion
     //region Variables
     private CustomButton[] buttons;
     private CustomButton[] gridButtons;
     private Cell[] cells;
+    private Solver solver;
+    private CellsHandler cellsHandler;
     private Menu menu;
     private MenuItem barMenuItemKeepScreen;
     private StringShelfDatabase stringShelfDatabase;
@@ -105,6 +105,10 @@ public class MainActivity extends Activity {
         cells = null;
         menu = null;
         savePreferences();
+        solver.close();
+        solver = null;
+        cellsHandler.close();
+        cellsHandler = null;
     }
     //endregion
 
@@ -116,30 +120,37 @@ public class MainActivity extends Activity {
         keepScreen = getSHPKeepScreen();
         setupStringShelfDatabase();
         cells = cellRowsToCells(StringShelfDatabaseUtils.getCells(stringShelfDatabase));
+        setupCellsHandler();
+        setupSolver();
         setupButtonColors();
         setupGridButtonColors();
 
         if (isColdStartStatusInMainActivity(stringShelfDatabase)) {
             setStartStatusInMainActivity(stringShelfDatabase, ACTIVITY_START_STATUS.HOT);
-            resetSolve();
+            reset();
         } else {
             solveState = getSHPSolveState();
             pointer = getSHPPointer();
             editPointer = getSHPEditPointer();
+            solver.setPointer(pointer);
+            solver.setSolveState(solveState);
             if (validReturnFromCalledActivity) {
                 validReturnFromCalledActivity = false;
                 if (returnsFromInputButtonsActivity()) {
                     String input = getCurrentStringInInputButtonsActivity(stringShelfDatabase, getCellsTableName(), getCellValueIndex());
                     if (input.length() >= 1) {
-                        cells[editPointer].setValue(Integer.parseInt(input));
+                        cells[editPointer].value = Integer.parseInt(input);
                         if (!cells[editPointer].isProtected()) {
+                            cellsHandler.unlinkPreviouslyUnprotectedCell(editPointer);
                             cells[editPointer].protectTemporarily();
                         }
                     } else {
-                        cells[editPointer].delete();
+                        if (!cells[editPointer].isEmpty()) {
+                            cellsHandler.emptyCell(editPointer);
+                        }
                     }
-                    deleteAllExceptProtectedCells();
-                    resetSolve();
+                    cellsHandler.deleteAllExceptProtectedCells();
+                    reset();
                 }
             }
         }
@@ -193,15 +204,15 @@ public class MainActivity extends Activity {
                 @Override
                 public void onClick(DialogInterface dialogInterface, int id) {
                     if (it.getItemId() == R.id.DELETE_ALL_EXCEPT_PROTECTED) {
-                        deleteAllExceptProtectedCells();
+                        cellsHandler.deleteAllExceptProtectedCells();
                     }
                     if (it.getItemId() == R.id.DELETE_ALL_EXCEPT_PERMANENT) {
-                        deleteAllExceptPermanentCells();
+                        cellsHandler.deleteAllExceptPermanentCells();
                     }
                     if (it.getItemId() == R.id.DELETE_ALL) {
-                        deleteAllCells();
+                        cellsHandler.deleteAllCells();
                     }
-                    resetSolve();
+                    reset();
                 }
             });
             builder.setNegativeButton("No", null);
@@ -229,19 +240,29 @@ public class MainActivity extends Activity {
 
     private void onButtonClick(COMMANDS command) {
         if (command.equals(COMMANDS.PERMANENT)) {
-            setTemporaryCellsToPermanent();
+            cellsHandler.setTemporaryCellsToPermanent();
             updateDisplayGridButtonColors();
         }
         if (command.equals(COMMANDS.SOLVE)) {
-            solve();
+            solver.solve();
         }
     }
 
     private void onGridButtonClick(int index) {
         editPointer = index;
-        deleteAllExceptProtectedCells();
-        setCurrentStringInInputButtonsActivity(stringShelfDatabase, getCellsTableName(), getCellValueIndex(), String.valueOf(cells[editPointer].getValue()));
+        cellsHandler.deleteAllExceptProtectedCells();
+        setCurrentStringInInputButtonsActivity(stringShelfDatabase, getCellsTableName(), getCellValueIndex(), String.valueOf(cells[editPointer].value));
         launchInputButtonsActivity();
+    }
+
+    private void onSolverEnd() {
+        updateDisplayGridButtonTexts();
+        updateDisplayButtonColors();
+    }
+
+    private void reset() {
+        cellsHandler.reset();
+        solver.reset();
     }
 
     private void updateDisplayButtonColors() {
@@ -252,15 +273,15 @@ public class MainActivity extends Activity {
 
         for (final COMMANDS command : COMMANDS.values()) {
             if (command.equals(COMMANDS.SOLVE)) {
-                if (solveState.equals(SOLVE_STATES.SOLUTION_FOUND)) {
+                if (solver.getSolveState().equals(SOLVE_STATES.SOLUTION_FOUND)) {
                     buttons[command.INDEX()].setUnpressedColor(SOLUTION_FOUND_UNPRESSED_COLOR);
                     buttons[command.INDEX()].setPressedColor(SOLUTION_FOUND_PRESSED_COLOR);
                 }
-                if (solveState.equals(SOLVE_STATES.IMPOSSIBLE)) {
+                if (solver.getSolveState().equals(SOLVE_STATES.IMPOSSIBLE)) {
                     buttons[command.INDEX()].setUnpressedColor(NO_SOLUTION_UNPRESSED_COLOR);
                     buttons[command.INDEX()].setPressedColor(NO_SOLUTION_PRESSED_COLOR);
                 }
-                if (solveState.equals(SOLVE_STATES.UNKNOWN)) {
+                if (solver.getSolveState().equals(SOLVE_STATES.UNKNOWN)) {
                     buttons[command.INDEX()].setUnpressedColor(BUTTON_STATES.UNPRESSED.DEFAULT_COLOR());
                     buttons[command.INDEX()].setPressedColor(BUTTON_STATES.PRESSED.DEFAULT_COLOR());
                 }
@@ -307,7 +328,7 @@ public class MainActivity extends Activity {
         if (cells[index].isEmpty()) {
             gridButtons[index].setText("");
         } else {
-            gridButtons[index].setText(String.valueOf(cells[index].getValue()));
+            gridButtons[index].setText(String.valueOf(cells[index].value));
         }
     }
 
@@ -323,177 +344,11 @@ public class MainActivity extends Activity {
         }
     }
 
-    public void resetSolve() {
-        pointer = POINTER_DEFAULT_VALUE;
-        solveState = SOLVE_STATES.UNKNOWN;
-    }
-
-    public void solve() {
-        boolean cellUnique;
-
-        if (!solveState.equals(SOLVE_STATES.IMPOSSIBLE)) {
-            solveState = SOLVE_STATES.UNKNOWN;
-            if (cells[pointer].isProtected()) {
-                pointer = getNextUnprotectedCellIndex(pointer);
-            }
-            do {
-                do {
-                    cellUnique = false;
-                    cells[pointer].setValue(cells[pointer].getValue() + 1);
-                    if (cells[pointer].getValue() <= GRID_ROWS) {
-                        if (isCellUniqueInRow(pointer)) {
-                            if (isCellUniqueInColumn(pointer)) {
-                                if (isCellUniqueInSquare(pointer)) {
-                                    cellUnique = true;
-                                }
-                            }
-                        }
-                    }
-                } while ((!cellUnique) && (cells[pointer].getValue() <= GRID_ROWS));
-                if (cellUnique) {
-                    pointer = getNextUnprotectedCellIndex(pointer);
-                } else {
-                    cells[pointer].delete();
-                    pointer = getPreviousUnprotectedCellIndex(pointer);
-                    if (pointer < 0) {
-                        pointer = POINTER_DEFAULT_VALUE;
-                        solveState = SOLVE_STATES.IMPOSSIBLE;
-                    }
-                }
-            } while ((pointer < GRID_SIZE) && (!solveState.equals(SOLVE_STATES.IMPOSSIBLE)));
-            if (pointer >= GRID_SIZE) {
-                pointer = getPreviousUnprotectedCellIndex(pointer);
-                solveState = SOLVE_STATES.SOLUTION_FOUND;
-            }
-        } else {
-            solveState = SOLVE_STATES.UNKNOWN;
-        }
-        updateDisplayGridButtonTexts();
-        updateDisplayButtonColors();
-    }
-
-    public boolean isCellUniqueInRow(int index) {
-        int cind;
-
-        int ir = GRID_ROWS * (int) ((float) index / (float) GRID_ROWS);
-        int i = 0;
-        do {
-            cind = ir + i;
-            if (cind != index) {
-                if (!cells[cind].isEmpty()) {
-                    if (cells[cind].getValue() == cells[index].getValue()) {
-                        return false;
-                    }
-                }
-            }
-            i = i + 1;
-        } while (i < GRID_ROWS);
-        return true;
-    }
-
-    public boolean isCellUniqueInColumn(int index) {
-        int cind;
-
-        int ic = index % GRID_ROWS;
-        int i = 0;
-        do {
-            cind = ic + GRID_ROWS * i;
-            if (cind != index) {
-                if (!cells[cind].isEmpty()) {
-                    if (cells[cind].getValue() == cells[index].getValue()) {
-                        return false;
-                    }
-                }
-            }
-            i = i + 1;
-        } while (i < GRID_ROWS);
-        return true;
-    }
-
-    public boolean isCellUniqueInSquare(int index) {
-        int cind;
-
-        int is = (SQUARE_STRIP_SIZE) * (int) ((float) index / (float) SQUARE_STRIP_SIZE) + SQUARE_ROWS * (int) ((float) index / (float) SQUARE_ROWS) - GRID_ROWS * (int) ((float) index / (float) GRID_ROWS);
-        int i = 0;
-        do {
-            int j = 0;
-            do {
-                cind = is + GRID_ROWS * i + j;
-                if (cind != index) {
-                    if (!cells[cind].isEmpty()) {
-                        if (cells[cind].getValue() == cells[index].getValue()) {
-                            return false;
-                        }
-                    }
-                }
-                j = j + 1;
-            } while (j < SQUARE_ROWS);
-            i = i + 1;
-        } while (i < SQUARE_ROWS);
-        return true;
-    }
-
-    public int getNextUnprotectedCellIndex(int index) {
-        int cind = index;
-        do {
-            cind = cind + 1;
-            if (cind < GRID_SIZE) {
-                if (!cells[cind].isProtected()) {
-                    return cind;
-                }
-            }
-        } while (cind < GRID_SIZE);
-        return cind;
-    }
-
-    public int getPreviousUnprotectedCellIndex(int index) {
-        int cind = index;
-        do {
-            cind = cind - 1;
-            if (cind >= 0) {
-                if (!cells[cind].isProtected()) {
-                    return cind;
-                }
-            }
-        } while (cind >= 0);
-        return cind;
-    }
-
-    public void deleteAllExceptProtectedCells() {
-        for (int i = 0; i <= (GRID_SIZE - 1); i = i + 1) {
-            if (!cells[i].isProtected()) {
-                cells[i].delete();
-            }
-        }
-    }
-
-    public void deleteAllExceptPermanentCells() {
-        for (int i = 0; i <= (GRID_SIZE - 1); i = i + 1) {
-            if (!cells[i].isProtectedPermanently()) {
-                cells[i].delete();
-            }
-        }
-    }
-
-    public void deleteAllCells() {
-        for (int i = 0; i <= (GRID_SIZE - 1); i = i + 1) {
-            cells[i].delete();
-        }
-    }
-
-    public void setTemporaryCellsToPermanent() {
-        for (int i = 0; i <= (GRID_SIZE - 1); i = i + 1) {
-            if (cells[i].isProtectedTemporarily()) {
-                cells[i].protectPermanently();
-            }
-        }
-    }
-
     private void savePreferences() {
         SharedPreferences shp = getSharedPreferences(shpFileName, MODE_PRIVATE);
         SharedPreferences.Editor shpEditor = shp.edit();
-        shpEditor.putString(SUDOKU_SHP_KEY_NAMES.SOLUTION_ERROR.toString(), solveState.toString());
-        shpEditor.putInt(SUDOKU_SHP_KEY_NAMES.POINTER.toString(), pointer);
+        shpEditor.putString(SUDOKU_SHP_KEY_NAMES.SOLVE_STATE.toString(), solver.getSolveState().toString());
+        shpEditor.putInt(SUDOKU_SHP_KEY_NAMES.POINTER.toString(), solver.getPointer());
         shpEditor.putInt(SUDOKU_SHP_KEY_NAMES.EDIT_POINTER.toString(), editPointer);
         shpEditor.putBoolean(SUDOKU_SHP_KEY_NAMES.KEEP_SCREEN.toString(), keepScreen);
         shpEditor.commit();
@@ -501,17 +356,17 @@ public class MainActivity extends Activity {
 
     private SOLVE_STATES getSHPSolveState() {
         SharedPreferences shp = getSharedPreferences(shpFileName, MODE_PRIVATE);
-        return SOLVE_STATES.valueOf(shp.getString(SUDOKU_SHP_KEY_NAMES.SOLUTION_ERROR.toString(), SOLVE_STATES.UNKNOWN.toString()));
+        return SOLVE_STATES.valueOf(shp.getString(SUDOKU_SHP_KEY_NAMES.SOLVE_STATE.toString(), SOLVE_STATES.UNKNOWN.toString()));
     }
 
     private int getSHPPointer() {
         SharedPreferences shp = getSharedPreferences(shpFileName, MODE_PRIVATE);
-        return shp.getInt(SUDOKU_SHP_KEY_NAMES.POINTER.toString(), POINTER_DEFAULT_VALUE);
+        return shp.getInt(SUDOKU_SHP_KEY_NAMES.POINTER.toString(), 0);
     }
 
     private int getSHPEditPointer() {
         SharedPreferences shp = getSharedPreferences(shpFileName, MODE_PRIVATE);
-        return shp.getInt(SUDOKU_SHP_KEY_NAMES.EDIT_POINTER.toString(), POINTER_DEFAULT_VALUE);
+        return shp.getInt(SUDOKU_SHP_KEY_NAMES.EDIT_POINTER.toString(), 0);
     }
 
     private boolean getSHPKeepScreen() {
@@ -519,6 +374,20 @@ public class MainActivity extends Activity {
 
         SharedPreferences shp = getSharedPreferences(shpFileName, MODE_PRIVATE);
         return shp.getBoolean(SUDOKU_SHP_KEY_NAMES.KEEP_SCREEN.toString(), KEEP_SCREEN_DEFAULT_VALUE);
+    }
+
+    private void setupCellsHandler() {
+        cellsHandler = new CellsHandler(cells);
+    }
+
+    private void setupSolver() {
+        solver = new Solver(cellsHandler);
+        solver.setOnSolveEndListener(new Solver.onSolveEndListener() {
+            @Override
+            public void onSolveEnd() {
+                onSolverEnd();
+            }
+        });
     }
 
     private void setupButtons() {
