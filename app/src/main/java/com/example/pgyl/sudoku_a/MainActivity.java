@@ -102,13 +102,13 @@ public class MainActivity extends Activity {
         saveCells(stringShelfDatabase, cellsToCellRows(cells));
         stringShelfDatabase.close();
         stringShelfDatabase = null;
-        cells = null;
         menu = null;
         savePreferences();
         solver.close();
         solver = null;
         cellsHandler.close();
         cellsHandler = null;
+        cells = null;
     }
     //endregion
 
@@ -247,7 +247,6 @@ public class MainActivity extends Activity {
 
     private void onGridButtonClick(int index) {
         editPointer = index;
-        cellsHandler.deleteAllExceptProtectedCells();
         setCurrentStringInInputButtonsActivity(stringShelfDatabase, getCellsTableName(), getCellValueIndex(), String.valueOf(cells[editPointer].value));
         launchInputButtonsActivity();
     }
