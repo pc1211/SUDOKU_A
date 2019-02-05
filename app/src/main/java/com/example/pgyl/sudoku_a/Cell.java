@@ -38,11 +38,13 @@ public class Cell {
     }
 
     private void init() {
-        rowDigitRoomIndex = 0;
-        colDigitRoomIndex = 0;
-        squareDigitRoomIndex = 0;
-        nextUnprotectedCellIndex = 0;
-        previousUnprotectedCellIndex = 0;
+        final int INDEX_DEFAULT_VALUE = 0;
+
+        rowDigitRoomIndex = INDEX_DEFAULT_VALUE;
+        colDigitRoomIndex = INDEX_DEFAULT_VALUE;
+        squareDigitRoomIndex = INDEX_DEFAULT_VALUE;
+        nextUnprotectedCellIndex = INDEX_DEFAULT_VALUE;
+        previousUnprotectedCellIndex = INDEX_DEFAULT_VALUE;
     }
 
     public void empty() {

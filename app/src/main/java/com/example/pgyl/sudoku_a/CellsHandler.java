@@ -85,14 +85,20 @@ public class CellsHandler {
     }
 
     private void linkCells() {
+        boolean p;
+
         int lastCellIndex = -1;
         firstUnprotectedCellIndex = -1;
-        lastUnprotectedCellIndex = gridSize;
+        lastUnprotectedCellIndex = -1;
         int i = 0;
         do {
-            while (cells[i].isProtected()) {
-                i = i + 1;
+            do {
+                p = (cells[i].isProtected());
+                if (p) {
+                    i = i + 1;
+                }
             }
+            while ((i < gridSize) & (p));
             if (i < gridSize) {
                 if (lastCellIndex != -1) {
                     cells[lastCellIndex].nextUnprotectedCellIndex = i;

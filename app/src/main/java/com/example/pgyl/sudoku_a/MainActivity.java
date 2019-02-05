@@ -103,6 +103,8 @@ public class MainActivity extends Activity {
         stringShelfDatabase.close();
         stringShelfDatabase = null;
         menu = null;
+        pointer = solver.getPointer();
+        solveState = solver.getSolveState();
         savePreferences();
         solver.close();
         solver = null;
@@ -127,7 +129,6 @@ public class MainActivity extends Activity {
 
         if (isColdStartStatusInMainActivity(stringShelfDatabase)) {
             setStartStatusInMainActivity(stringShelfDatabase, ACTIVITY_START_STATUS.HOT);
-            reset();
         } else {
             solveState = getSHPSolveState();
             pointer = getSHPPointer();
@@ -147,7 +148,7 @@ public class MainActivity extends Activity {
                         cells[editPointer].empty();
                     }
                     cellsHandler.deleteAllExceptProtectedCells();
-                    reset();
+                    solver.reset();
                 }
             }
         }
@@ -209,7 +210,7 @@ public class MainActivity extends Activity {
                     if (it.getItemId() == R.id.DELETE_ALL) {
                         cellsHandler.deleteAllCells();
                     }
-                    reset();
+                    solver.reset();
                 }
             });
             builder.setNegativeButton("No", null);
@@ -256,16 +257,11 @@ public class MainActivity extends Activity {
         updateDisplayButtonColors();
     }
 
-    private void reset() {
-        cellsHandler.reset();
-        solver.reset();
-    }
-
     private void updateDisplayButtonColors() {
-        final String SOLUTION_FOUND_UNPRESSED_COLOR = "00B777";   //  Green
+        final String SOLUTION_FOUND_UNPRESSED_COLOR = "00B777";   //  Vert
         final String SOLUTION_FOUND_PRESSED_COLOR = "006944";
-        final String NO_SOLUTION_UNPRESSED_COLOR = "FF0000";   //  Red
-        final String NO_SOLUTION_PRESSED_COLOR = "940000";
+        final String IMPOSSIBLE_UNPRESSED_COLOR = "FF0000";       //  Rouge
+        final String IMPOSSIBLE_PRESSED_COLOR = "940000";
 
         for (final COMMANDS command : COMMANDS.values()) {
             if (command.equals(COMMANDS.SOLVE)) {
@@ -274,8 +270,8 @@ public class MainActivity extends Activity {
                     buttons[command.INDEX()].setPressedColor(SOLUTION_FOUND_PRESSED_COLOR);
                 }
                 if (solver.getSolveState().equals(SOLVE_STATES.IMPOSSIBLE)) {
-                    buttons[command.INDEX()].setUnpressedColor(NO_SOLUTION_UNPRESSED_COLOR);
-                    buttons[command.INDEX()].setPressedColor(NO_SOLUTION_PRESSED_COLOR);
+                    buttons[command.INDEX()].setUnpressedColor(IMPOSSIBLE_UNPRESSED_COLOR);
+                    buttons[command.INDEX()].setPressedColor(IMPOSSIBLE_PRESSED_COLOR);
                 }
                 if (solver.getSolveState().equals(SOLVE_STATES.UNKNOWN)) {
                     buttons[command.INDEX()].setUnpressedColor(BUTTON_STATES.UNPRESSED.DEFAULT_COLOR());
@@ -293,9 +289,9 @@ public class MainActivity extends Activity {
     }
 
     private void updateDisplayGridButtonColor(int index) {
-        final String TEMPORARY_UNPRESSED_COLOR = "FF9A22";
+        final String TEMPORARY_UNPRESSED_COLOR = "FF9A22";            //  Orange
         final String TEMPORARY_PRESSED_COLOR = "995400";
-        final String PERMANENT_UNPRESSED_COLOR_DEFAULT = "668CFF";
+        final String PERMANENT_UNPRESSED_COLOR_DEFAULT = "668CFF";    // Bleu
         final String PERMANENT_PRESSED_COLOR_DEFAULT = "0040FF";
 
         if (!cells[index].isProtected()) {
@@ -343,8 +339,8 @@ public class MainActivity extends Activity {
     private void savePreferences() {
         SharedPreferences shp = getSharedPreferences(shpFileName, MODE_PRIVATE);
         SharedPreferences.Editor shpEditor = shp.edit();
-        shpEditor.putString(SUDOKU_SHP_KEY_NAMES.SOLVE_STATE.toString(), solver.getSolveState().toString());
-        shpEditor.putInt(SUDOKU_SHP_KEY_NAMES.POINTER.toString(), solver.getPointer());
+        shpEditor.putString(SUDOKU_SHP_KEY_NAMES.SOLVE_STATE.toString(), solveState.toString());
+        shpEditor.putInt(SUDOKU_SHP_KEY_NAMES.POINTER.toString(), pointer);
         shpEditor.putInt(SUDOKU_SHP_KEY_NAMES.EDIT_POINTER.toString(), editPointer);
         shpEditor.putBoolean(SUDOKU_SHP_KEY_NAMES.KEEP_SCREEN.toString(), keepScreen);
         shpEditor.commit();
