@@ -130,8 +130,8 @@ public class Solver {
 
     private void bookDigitRoom(int index) {
         digitRooms[cells[index].rowDigitRoomIndex][cells[index].value] = !DIGIT_ROOM_FREE;
-        digitRooms[cells[index].colDigitRoomIndex][cells[index].value] = DIGIT_ROOM_FREE;
-        digitRooms[cells[index].squareDigitRoomIndex][cells[index].value] = DIGIT_ROOM_FREE;
+        digitRooms[cells[index].colDigitRoomIndex][cells[index].value] = !DIGIT_ROOM_FREE;
+        digitRooms[cells[index].squareDigitRoomIndex][cells[index].value] = !DIGIT_ROOM_FREE;
     }
 
     private void freeDigitRoom(int index) {
