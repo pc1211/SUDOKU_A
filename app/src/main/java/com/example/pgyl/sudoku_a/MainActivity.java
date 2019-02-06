@@ -139,16 +139,26 @@ public class MainActivity extends Activity {
                 validReturnFromCalledActivity = false;
                 if (returnsFromInputButtonsActivity()) {
                     String input = getCurrentStringInInputButtonsActivity(stringShelfDatabase, getCellsTableName(), getCellValueIndex());
+                    Cell editCell = cells[editPointer];
+                    String errorMsg = "";
                     if (input.length() >= 1) {
-                        cells[editPointer].value = Integer.parseInt(input);
-                        if (!cells[editPointer].isProtected()) {
-                            cells[editPointer].protectTemporarily();
+                        int newValue = Integer.parseInt(input);
+                        errorMsg = testCellContents(editCell, newValue);
+                        if (errorMsg.equals("")) {     //  cad pas de remarques
+                            editCell.value = newValue;
+                            if (!editCell.isProtected()) {
+                                editCell.protectTemporarily();
+                            }
+                        } else {
+                            msgBox(errorMsg, this);
                         }
                     } else {
-                        cells[editPointer].empty();
+                        editCell.empty();
                     }
-                    cellsHandler.deleteAllExceptProtectedCells();
-                    solver.reset();
+                    if (errorMsg.equals("")) {
+                        cellsHandler.deleteAllExceptProtectedCells();
+                        solver.reset();
+                    }
                 }
             }
         }
@@ -255,6 +265,34 @@ public class MainActivity extends Activity {
     private void onSolverEnd() {
         updateDisplayGridButtonTexts();
         updateDisplayButtonColors();
+    }
+
+    private String testCellContents(Cell cell, int newValue) {
+        String ret = "";
+        int oldCellValue = cell.value;
+        boolean oldEmpty = cell.isEmpty();
+        if (!cell.isEmpty()) {
+            solver.freeDigitRoom(cell);
+        }
+        cell.value = newValue;
+        if (!solver.isCellUniqueInRow(cell)) {
+            ret = ret + ((!ret.equals("")) ? " and " : "") + "row";
+        }
+        if (!solver.isCellUniqueInColumn(cell)) {
+            ret = ret + ((!ret.equals("")) ? " and " : "") + "column";
+        }
+        if (!solver.isCellUniqueInSquare(cell)) {
+            ret = ret + ((!ret.equals("")) ? " and " : "") + "square";
+        }
+        if (!ret.equals("")) {
+            ret = "There is already a " + String.valueOf(newValue) + " in the same " + ret;
+        }
+
+        cell.value = oldCellValue;       //  Remettre tout en état
+        if (!oldEmpty) {
+            solver.bookDigitRoom(cell);
+        }
+        return ret;
     }
 
     private void updateDisplayButtonColors() {

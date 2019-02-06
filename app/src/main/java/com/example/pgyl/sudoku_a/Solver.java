@@ -81,17 +81,18 @@ public class Solver {
             solveState = SOLVE_STATES.UNKNOWN;
             do {
                 pointerOverflow = false;
-                if (!cells[pointer].isEmpty()) {
-                    freeDigitRoom(pointer);
+                Cell currentCell = cells[pointer];
+                if (!currentCell.isEmpty()) {
+                    freeDigitRoom(currentCell);
                 }
                 do {
                     cellUnique = false;
                     digitOverflow = false;
-                    cells[pointer].value = cells[pointer].value + 1;
-                    if (cells[pointer].value <= gridRows) {
-                        if (isCellUniqueInRow(pointer)) {
-                            if (isCellUniqueInColumn(pointer)) {
-                                if (isCellUniqueInSquare(pointer)) {
+                    currentCell.value = currentCell.value + 1;
+                    if (currentCell.value <= gridRows) {
+                        if (isCellUniqueInRow(currentCell)) {
+                            if (isCellUniqueInColumn(currentCell)) {
+                                if (isCellUniqueInSquare(currentCell)) {
                                     cellUnique = true;
                                 }
                             }
@@ -101,16 +102,16 @@ public class Solver {
                     }
                 } while ((!cellUnique) && (!digitOverflow));
                 if (cellUnique) {
-                    bookDigitRoom(pointer);
+                    bookDigitRoom(currentCell);
                     if (pointer != cellsHandler.getLastUnprotectedCellIndex()) {
-                        pointer = cells[pointer].nextUnprotectedCellIndex;
+                        pointer = currentCell.nextUnprotectedCellIndex;
                     } else {
                         pointerOverflow = true;
                     }
                 } else {
-                    cells[pointer].empty();
+                    currentCell.empty();
                     if (pointer != cellsHandler.getFirstUnprotectedCellIndex()) {
-                        pointer = cells[pointer].previousUnprotectedCellIndex;
+                        pointer = currentCell.previousUnprotectedCellIndex;
                     } else {
                         solveState = SOLVE_STATES.IMPOSSIBLE;
                     }
@@ -128,28 +129,28 @@ public class Solver {
         }
     }
 
-    private void bookDigitRoom(int index) {
-        digitRooms[cells[index].rowDigitRoomIndex][cells[index].value] = !DIGIT_ROOM_FREE;
-        digitRooms[cells[index].colDigitRoomIndex][cells[index].value] = !DIGIT_ROOM_FREE;
-        digitRooms[cells[index].squareDigitRoomIndex][cells[index].value] = !DIGIT_ROOM_FREE;
+    public boolean isCellUniqueInRow(Cell cell) {
+        return (digitRooms[cell.rowDigitRoomIndex][cell.value]);
     }
 
-    private void freeDigitRoom(int index) {
-        digitRooms[cells[index].rowDigitRoomIndex][cells[index].value] = DIGIT_ROOM_FREE;
-        digitRooms[cells[index].colDigitRoomIndex][cells[index].value] = DIGIT_ROOM_FREE;
-        digitRooms[cells[index].squareDigitRoomIndex][cells[index].value] = DIGIT_ROOM_FREE;
+    public boolean isCellUniqueInColumn(Cell cell) {
+        return (digitRooms[cell.colDigitRoomIndex][cell.value]);
     }
 
-    private boolean isCellUniqueInRow(int index) {
-        return (digitRooms[cells[index].rowDigitRoomIndex][cells[index].value]);
+    public boolean isCellUniqueInSquare(Cell cell) {
+        return (digitRooms[cell.squareDigitRoomIndex][cell.value]);
     }
 
-    private boolean isCellUniqueInColumn(int index) {
-        return (digitRooms[cells[index].colDigitRoomIndex][cells[index].value]);
+    public void bookDigitRoom(Cell cell) {
+        digitRooms[cell.rowDigitRoomIndex][cell.value] = !DIGIT_ROOM_FREE;
+        digitRooms[cell.colDigitRoomIndex][cell.value] = !DIGIT_ROOM_FREE;
+        digitRooms[cell.squareDigitRoomIndex][cell.value] = !DIGIT_ROOM_FREE;
     }
 
-    private boolean isCellUniqueInSquare(int index) {
-        return (digitRooms[cells[index].squareDigitRoomIndex][cells[index].value]);
+    public void freeDigitRoom(Cell cell) {
+        digitRooms[cell.rowDigitRoomIndex][cell.value] = DIGIT_ROOM_FREE;
+        digitRooms[cell.colDigitRoomIndex][cell.value] = DIGIT_ROOM_FREE;
+        digitRooms[cell.squareDigitRoomIndex][cell.value] = DIGIT_ROOM_FREE;
     }
 
     private void setupDigitRooms() {
@@ -164,7 +165,7 @@ public class Solver {
     private void populateDigitRooms() {
         for (int i = 0; i <= (gridSize - 1); i = i + 1) {
             if (!cells[i].isEmpty()) {
-                bookDigitRoom(i);
+                bookDigitRoom(cells[i]);
             }
         }
     }
