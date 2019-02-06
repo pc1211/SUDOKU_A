@@ -49,7 +49,7 @@ import static com.example.pgyl.sudoku_a.StringShelfDatabaseUtils.tableCellsExist
 public class MainActivity extends Activity {
     //region Constantes
     private enum COMMANDS {
-        PERMANENT, SOLVE;
+        PROTECTED_SPECIAL, SOLVE;
 
         public int INDEX() {
             return ordinal();
@@ -182,7 +182,7 @@ public class MainActivity extends Activity {
             updateDisplayKeepScreen();
             updateDisplayKeepScreenBarMenuItemIcon(keepScreen);
         }
-        if ((item.getItemId() == R.id.DELETE_ALL_EXCEPT_PROTECTED) || (item.getItemId() == R.id.DELETE_ALL_EXCEPT_PERMANENT) || (item.getItemId() == R.id.DELETE_ALL)) {
+        if ((item.getItemId() == R.id.DELETE_ALL_EXCEPT_PROTECTED_NORMAL) || (item.getItemId() == R.id.DELETE_ALL_EXCEPT_PROTECTED_SPECIAL) || (item.getItemId() == R.id.DELETE_ALL)) {
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
             builder.setTitle(item.getTitle());
             builder.setMessage("Are you sure ?");
@@ -191,11 +191,11 @@ public class MainActivity extends Activity {
             builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialogInterface, int id) {
-                    if (it.getItemId() == R.id.DELETE_ALL_EXCEPT_PROTECTED) {
+                    if (it.getItemId() == R.id.DELETE_ALL_EXCEPT_PROTECTED_NORMAL) {
                         cellsHandler.deleteAllExceptProtectedCells();
                     }
-                    if (it.getItemId() == R.id.DELETE_ALL_EXCEPT_PERMANENT) {
-                        cellsHandler.deleteAllExceptPermanentCells();
+                    if (it.getItemId() == R.id.DELETE_ALL_EXCEPT_PROTECTED_SPECIAL) {
+                        cellsHandler.deleteAllExceptProtectedSpecialCells();
                     }
                     if (it.getItemId() == R.id.DELETE_ALL) {
                         cellsHandler.deleteAllCells();
@@ -227,8 +227,8 @@ public class MainActivity extends Activity {
     }
 
     private void onButtonClick(COMMANDS command) {
-        if (command.equals(COMMANDS.PERMANENT)) {
-            cellsHandler.setTemporaryCellsToPermanent();
+        if (command.equals(COMMANDS.PROTECTED_SPECIAL)) {
+            cellsHandler.setProtectedNormalCellsToProtectedSpecial();
             updateDisplayGridButtonColors();
         }
         if (command.equals(COMMANDS.SOLVE)) {
@@ -256,7 +256,7 @@ public class MainActivity extends Activity {
             if (errorMsg.equals("")) {     //  cad pas de remarques
                 editCell.value = newValue;
                 if (!editCell.isProtected()) {
-                    editCell.protectTemporarily();
+                    editCell.protectNormal();
                 }
             } else {
                 msgBox(errorMsg, this);
@@ -329,22 +329,22 @@ public class MainActivity extends Activity {
     }
 
     private void updateDisplayGridButtonColor(int index) {
-        final String TEMPORARY_UNPRESSED_COLOR = "FF9A22";            //  Orange
-        final String TEMPORARY_PRESSED_COLOR = "995400";
-        final String PERMANENT_UNPRESSED_COLOR_DEFAULT = "668CFF";    // Bleu
-        final String PERMANENT_PRESSED_COLOR_DEFAULT = "0040FF";
+        final String PROTECTED_NORMAL_TEMPORARY_UNPRESSED_COLOR = "FF9A22";            //  Orange
+        final String PROTECTED_NORMAL_PRESSED_COLOR = "995400";
+        final String PROTECTED_SPECIAL_UNPRESSED_COLOR_DEFAULT = "668CFF";    // Bleu
+        final String PROTECTED_SPECIAL_PRESSED_COLOR_DEFAULT = "0040FF";
 
         if (!cells[index].isProtected()) {
             gridButtons[index].setUnpressedColor(BUTTON_STATES.UNPRESSED.DEFAULT_COLOR());
             gridButtons[index].setPressedColor(BUTTON_STATES.PRESSED.DEFAULT_COLOR());
         } else {
-            if (cells[index].isProtectedPermanently()) {
-                gridButtons[index].setUnpressedColor(PERMANENT_UNPRESSED_COLOR_DEFAULT);
-                gridButtons[index].setPressedColor(PERMANENT_PRESSED_COLOR_DEFAULT);
+            if (cells[index].isProtectedSpecial()) {
+                gridButtons[index].setUnpressedColor(PROTECTED_SPECIAL_UNPRESSED_COLOR_DEFAULT);
+                gridButtons[index].setPressedColor(PROTECTED_SPECIAL_PRESSED_COLOR_DEFAULT);
             }
-            if (cells[index].isProtectedTemporarily()) {
-                gridButtons[index].setUnpressedColor(TEMPORARY_UNPRESSED_COLOR);
-                gridButtons[index].setPressedColor(TEMPORARY_PRESSED_COLOR);
+            if (cells[index].isProtectedNormal()) {
+                gridButtons[index].setUnpressedColor(PROTECTED_NORMAL_TEMPORARY_UNPRESSED_COLOR);
+                gridButtons[index].setPressedColor(PROTECTED_NORMAL_PRESSED_COLOR);
             }
         }
         gridButtons[index].updateColor();

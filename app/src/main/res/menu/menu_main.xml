@@ -5,13 +5,13 @@
         android:showAsAction="always"
         android:title="Keep screen (ON/OFF)" />
     <item
-        android:id="@+id/DELETE_ALL_EXCEPT_PROTECTED"
+        android:id="@+id/DELETE_ALL_EXCEPT_PROTECTED_NORMAL"
         android:showAsAction="never"
         android:title="Delete all except Protected" />
     <item
-        android:id="@+id/DELETE_ALL_EXCEPT_PERMANENT"
+        android:id="@+id/DELETE_ALL_EXCEPT_PROTECTED_SPECIAL"
         android:showAsAction="never"
-        android:title="Delete all except Permanent" />
+        android:title="Delete all except Protected+" />
     <item
         android:id="@+id/DELETE_ALL"
         android:showAsAction="never"

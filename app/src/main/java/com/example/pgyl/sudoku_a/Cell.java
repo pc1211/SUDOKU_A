@@ -3,7 +3,7 @@ package com.example.pgyl.sudoku_a;
 public class Cell {
     //region Constantes
     private enum STATUS {
-        UNPROTECTED, PROTECTED_TEMPORARILY, PROTECTED_PERMANENTLY;
+        UNPROTECTED, PROTECTED_NORMAL, PROTECTED_SPECIAL;
 
         public int getValue() {
             return ordinal();
@@ -64,24 +64,24 @@ public class Cell {
         return (status != STATUS.UNPROTECTED.getValue());
     }
 
-    public boolean isProtectedTemporarily() {
-        return (status == STATUS.PROTECTED_TEMPORARILY.getValue());
+    public boolean isProtectedNormal() {
+        return (status == STATUS.PROTECTED_NORMAL.getValue());
     }
 
-    public boolean isProtectedPermanently() {
-        return (status == STATUS.PROTECTED_PERMANENTLY.getValue());
+    public boolean isProtectedSpecial() {
+        return (status == STATUS.PROTECTED_SPECIAL.getValue());
     }
 
     public void unprotect() {
         status = STATUS.UNPROTECTED.getValue();
     }
 
-    public void protectTemporarily() {
-        status = STATUS.PROTECTED_TEMPORARILY.getValue();
+    public void protectNormal() {
+        status = STATUS.PROTECTED_NORMAL.getValue();
     }
 
-    public void protectPermanently() {
-        status = STATUS.PROTECTED_PERMANENTLY.getValue();
+    public void protectSpecial() {
+        status = STATUS.PROTECTED_SPECIAL.getValue();
     }
 
 }

@@ -52,9 +52,9 @@ public class CellsHandler {
         linkCells();
     }
 
-    public void deleteAllExceptPermanentCells() {
+    public void deleteAllExceptProtectedSpecialCells() {
         for (int i = 0; i <= (gridSize - 1); i = i + 1) {
-            if (!cells[i].isProtectedPermanently()) {
+            if (!cells[i].isProtectedSpecial()) {
                 cells[i].empty();
             }
         }
@@ -68,10 +68,10 @@ public class CellsHandler {
         linkCells();
     }
 
-    public void setTemporaryCellsToPermanent() {
+    public void setProtectedNormalCellsToProtectedSpecial() {
         for (int i = 0; i <= (gridSize - 1); i = i + 1) {
-            if (cells[i].isProtectedTemporarily()) {
-                cells[i].protectPermanently();
+            if (cells[i].isProtectedNormal()) {
+                cells[i].protectSpecial();
             }
         }
     }
