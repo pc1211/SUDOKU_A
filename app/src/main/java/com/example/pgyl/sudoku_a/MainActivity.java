@@ -138,27 +138,7 @@ public class MainActivity extends Activity {
             if (validReturnFromCalledActivity) {
                 validReturnFromCalledActivity = false;
                 if (returnsFromInputButtonsActivity()) {
-                    String input = getCurrentStringInInputButtonsActivity(stringShelfDatabase, getCellsTableName(), getCellValueIndex());
-                    Cell editCell = cells[editPointer];
-                    String errorMsg = "";
-                    if (input.length() >= 1) {
-                        int newValue = Integer.parseInt(input);
-                        errorMsg = testCellContents(editCell, newValue);
-                        if (errorMsg.equals("")) {     //  cad pas de remarques
-                            editCell.value = newValue;
-                            if (!editCell.isProtected()) {
-                                editCell.protectTemporarily();
-                            }
-                        } else {
-                            msgBox(errorMsg, this);
-                        }
-                    } else {
-                        editCell.empty();
-                    }
-                    if (errorMsg.equals("")) {
-                        cellsHandler.deleteAllExceptProtectedCells();
-                        solver.reset();
-                    }
+                    handleCellInput(getCurrentStringInInputButtonsActivity(stringShelfDatabase, getCellsTableName(), getCellValueIndex()));
                 }
             }
         }
@@ -267,9 +247,32 @@ public class MainActivity extends Activity {
         updateDisplayButtonColors();
     }
 
+    private void handleCellInput(String input) {
+        Cell editCell = cells[editPointer];
+        String errorMsg = "";
+        if (input.length() >= 1) {
+            int newValue = Integer.parseInt(input);
+            errorMsg = testCellContents(editCell, newValue);
+            if (errorMsg.equals("")) {     //  cad pas de remarques
+                editCell.value = newValue;
+                if (!editCell.isProtected()) {
+                    editCell.protectTemporarily();
+                }
+            } else {
+                msgBox(errorMsg, this);
+            }
+        } else {
+            editCell.empty();
+        }
+        if (errorMsg.equals("")) {
+            cellsHandler.deleteAllExceptProtectedCells();
+            solver.reset();
+        }
+    }
+
     private String testCellContents(Cell cell, int newValue) {
         String ret = "";
-        int oldCellValue = cell.value;
+        int oldValue = cell.value;
         boolean oldIsEmpty = cell.isEmpty();
         if (!cell.isEmpty()) {
             solver.freeDigitRoom(cell);
@@ -287,8 +290,7 @@ public class MainActivity extends Activity {
         if (!ret.equals("")) {
             ret = "There is already a " + String.valueOf(newValue) + " in the same " + ret;
         }
-
-        cell.value = oldCellValue;       //  Remettre tout en état
+        cell.value = oldValue;       //  Remettre tout en état
         if (!oldIsEmpty) {
             solver.bookDigitRoom(cell);
         }

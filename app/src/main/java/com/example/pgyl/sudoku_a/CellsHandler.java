@@ -76,15 +76,7 @@ public class CellsHandler {
         }
     }
 
-    private void prepareCellsForSolver() {
-        for (int i = 0; i <= (gridSize - 1); i = i + 1) {
-            cells[i].rowDigitRoomIndex = i / gridRows;   //  (n° de ligne (0..8)) dans la grille
-            cells[i].colDigitRoomIndex = (i % gridRows) + gridRows;     //  (9 + n° de colonne (0..8)) dans la grille
-            cells[i].squareDigitRoomIndex = squareRows * ((i / gridRows) / squareRows) + ((i % gridRows) / squareRows) + 2 * gridRows;   //  (18 + n° de carré (0..8)) dans la grille
-        }
-    }
-
-    private void linkCells() {
+    public void linkCells() {
         boolean isProtected;
 
         int lastCellIndex = -1;
@@ -112,6 +104,14 @@ public class CellsHandler {
         } while (i < gridSize);
         if (lastCellIndex != -1) {
             lastUnprotectedCellIndex = lastCellIndex;
+        }
+    }
+
+    private void prepareCellsForSolver() {
+        for (int i = 0; i <= (gridSize - 1); i = i + 1) {
+            cells[i].rowDigitRoomIndex = i / gridRows;   //  (n° de ligne (0..8)) dans la grille
+            cells[i].colDigitRoomIndex = (i % gridRows) + gridRows;     //  (9 + n° de colonne (0..8)) dans la grille
+            cells[i].squareDigitRoomIndex = squareRows * ((i / gridRows) / squareRows) + ((i % gridRows) / squareRows) + 2 * gridRows;   //  (18 + n° de carré (0..8)) dans la grille
         }
     }
 

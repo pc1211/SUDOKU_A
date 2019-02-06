@@ -1,8 +1,22 @@
 <h2 style="color: #2e6c80;">Sudoku</h2>
-<p>To enter a cell <strong>value</strong> (and protect it), press its button (blank input to delete the cell)<br />
-To <strong>protect</strong> the values permanently, press the "> PERMANENT" button.<br />
+<p>To enter a cell <strong>value</strong>, press its button:<br />
+<ul>
+	<li>In case of blank input, the cell is deleted</li>
+	<li>After input of a digit:</li>
+	<ul>
+		<li>The cell is protected against the solver</li>
+		<li>The non protected cells are deleted</li>
+		<li>The solver is reset</li>
+	</ul>
+</ul>
+To <strong>protect</strong> permanently the already protected cells, press the "> PERMANENT" button.<br />
+The permanently protected cells could represent a sudoku as published in a newspaper.
+<br /><br />
 To <strong>solve</strong> the sudoku, press the "SOLVE" button.<br />
-(becomes green if solution found, or red if impossible to solve)
+<ul>
+	<li>The "SOLVE" button becomes green if a solution is found, or red if impossible to solve</li>
+	<li>Press it again to display the next solution</li>
+</ul>
 </p>
 <table>
     <thead>
