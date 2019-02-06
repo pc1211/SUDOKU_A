@@ -49,7 +49,7 @@ import static com.example.pgyl.sudoku_a.StringShelfDatabaseUtils.tableCellsExist
 public class MainActivity extends Activity {
     //region Constantes
     private enum COMMANDS {
-        PROTECTED_SPECIAL, SOLVE;
+        PROTECTED_DISTINCT, SOLVE;
 
         public int INDEX() {
             return ordinal();
@@ -182,7 +182,7 @@ public class MainActivity extends Activity {
             updateDisplayKeepScreen();
             updateDisplayKeepScreenBarMenuItemIcon(keepScreen);
         }
-        if ((item.getItemId() == R.id.DELETE_ALL_EXCEPT_PROTECTED_NORMAL) || (item.getItemId() == R.id.DELETE_ALL_EXCEPT_PROTECTED_SPECIAL) || (item.getItemId() == R.id.DELETE_ALL)) {
+        if ((item.getItemId() == R.id.DELETE_ALL_EXCEPT_PROTECTED_NORMAL) || (item.getItemId() == R.id.DELETE_ALL_EXCEPT_PROTECTED_DISTINCT) || (item.getItemId() == R.id.DELETE_ALL)) {
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
             builder.setTitle(item.getTitle());
             builder.setMessage("Are you sure ?");
@@ -194,12 +194,13 @@ public class MainActivity extends Activity {
                     if (it.getItemId() == R.id.DELETE_ALL_EXCEPT_PROTECTED_NORMAL) {
                         cellsHandler.deleteAllExceptProtectedCells();
                     }
-                    if (it.getItemId() == R.id.DELETE_ALL_EXCEPT_PROTECTED_SPECIAL) {
-                        cellsHandler.deleteAllExceptProtectedSpecialCells();
+                    if (it.getItemId() == R.id.DELETE_ALL_EXCEPT_PROTECTED_DISTINCT) {
+                        cellsHandler.deleteAllExceptProtectedDistinctCells();
                     }
                     if (it.getItemId() == R.id.DELETE_ALL) {
                         cellsHandler.deleteAllCells();
                     }
+                    cellsHandler.linkCells();
                     solver.reset();
                 }
             });
@@ -227,8 +228,8 @@ public class MainActivity extends Activity {
     }
 
     private void onButtonClick(COMMANDS command) {
-        if (command.equals(COMMANDS.PROTECTED_SPECIAL)) {
-            cellsHandler.setProtectedNormalCellsToProtectedSpecial();
+        if (command.equals(COMMANDS.PROTECTED_DISTINCT)) {
+            cellsHandler.setProtectedCellsNormalToDistinct();
             updateDisplayGridButtonColors();
         }
         if (command.equals(COMMANDS.SOLVE)) {
@@ -249,35 +250,26 @@ public class MainActivity extends Activity {
 
     private void handleCellInput(String input) {
         Cell editCell = cells[editPointer];
-        String errorMsg = "";
+        editCell.empty();
+        cellsHandler.deleteAllExceptProtectedCells();
+        cellsHandler.linkCells();
+        solver.reset();
         if (input.length() >= 1) {
-            int newValue = Integer.parseInt(input);
-            errorMsg = testCellContents(editCell, newValue);
-            if (errorMsg.equals("")) {     //  cad pas de remarques
-                editCell.value = newValue;
-                if (!editCell.isProtected()) {
-                    editCell.protectNormal();
-                }
+            editCell.value = Integer.parseInt(input);
+            String errorMsg = reportUniqueCellValue(editCell);
+            if (errorMsg.equals("")) {     //  cas pas de remarques
+                editCell.protectNormal();
             } else {
                 msgBox(errorMsg, this);
+                editCell.empty();
             }
-        } else {
-            editCell.empty();
-        }
-        if (errorMsg.equals("")) {
-            cellsHandler.deleteAllExceptProtectedCells();
+            cellsHandler.linkCells();
             solver.reset();
         }
     }
 
-    private String testCellContents(Cell cell, int newValue) {
+    private String reportUniqueCellValue(Cell cell) {
         String ret = "";
-        int oldValue = cell.value;
-        boolean oldIsEmpty = cell.isEmpty();
-        if (!cell.isEmpty()) {
-            solver.freeDigitRoom(cell);
-        }
-        cell.value = newValue;
         if (!solver.isCellUniqueInRow(cell)) {
             ret = ret + ((!ret.equals("")) ? " and " : "") + "row";
         }
@@ -288,11 +280,7 @@ public class MainActivity extends Activity {
             ret = ret + ((!ret.equals("")) ? " and " : "") + "square";
         }
         if (!ret.equals("")) {
-            ret = "There is already a " + String.valueOf(newValue) + " in the same " + ret;
-        }
-        cell.value = oldValue;       //  Remettre tout en état
-        if (!oldIsEmpty) {
-            solver.bookDigitRoom(cell);
+            ret = "There is already a " + String.valueOf(cell.value) + " in the same " + ret;
         }
         return ret;
     }
@@ -331,16 +319,16 @@ public class MainActivity extends Activity {
     private void updateDisplayGridButtonColor(int index) {
         final String PROTECTED_NORMAL_TEMPORARY_UNPRESSED_COLOR = "FF9A22";            //  Orange
         final String PROTECTED_NORMAL_PRESSED_COLOR = "995400";
-        final String PROTECTED_SPECIAL_UNPRESSED_COLOR_DEFAULT = "668CFF";    // Bleu
-        final String PROTECTED_SPECIAL_PRESSED_COLOR_DEFAULT = "0040FF";
+        final String PROTECTED_DISTINCT_UNPRESSED_COLOR_DEFAULT = "668CFF";    // Bleu
+        final String PROTECTED_DISTINCT_PRESSED_COLOR_DEFAULT = "0040FF";
 
         if (!cells[index].isProtected()) {
             gridButtons[index].setUnpressedColor(BUTTON_STATES.UNPRESSED.DEFAULT_COLOR());
             gridButtons[index].setPressedColor(BUTTON_STATES.PRESSED.DEFAULT_COLOR());
         } else {
-            if (cells[index].isProtectedSpecial()) {
-                gridButtons[index].setUnpressedColor(PROTECTED_SPECIAL_UNPRESSED_COLOR_DEFAULT);
-                gridButtons[index].setPressedColor(PROTECTED_SPECIAL_PRESSED_COLOR_DEFAULT);
+            if (cells[index].isProtectedDistinct()) {
+                gridButtons[index].setUnpressedColor(PROTECTED_DISTINCT_UNPRESSED_COLOR_DEFAULT);
+                gridButtons[index].setPressedColor(PROTECTED_DISTINCT_PRESSED_COLOR_DEFAULT);
             }
             if (cells[index].isProtectedNormal()) {
                 gridButtons[index].setUnpressedColor(PROTECTED_NORMAL_TEMPORARY_UNPRESSED_COLOR);

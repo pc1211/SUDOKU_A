@@ -9,9 +9,9 @@
         android:showAsAction="never"
         android:title="Delete all except Protected" />
     <item
-        android:id="@+id/DELETE_ALL_EXCEPT_PROTECTED_SPECIAL"
+        android:id="@+id/DELETE_ALL_EXCEPT_PROTECTED_DISTINCT"
         android:showAsAction="never"
-        android:title="Delete all except Protected+" />
+        android:title="Delete all except Distinct" />
     <item
         android:id="@+id/DELETE_ALL"
         android:showAsAction="never"

@@ -19,16 +19,12 @@ public class CellsHandler {
         gridSize = cells.length;
         gridRows = (int) Math.sqrt(gridSize);
         squareRows = (int) Math.sqrt(gridRows);
-        reset();
+        prepareCellsForSolver();
+        linkCells();
     }
 
     public void close() {
         cells = null;
-    }
-
-    public void reset() {
-        prepareCellsForSolver();
-        linkCells();
     }
 
     public Cell[] getCells() {
@@ -49,29 +45,26 @@ public class CellsHandler {
                 cells[i].empty();
             }
         }
-        linkCells();
     }
 
-    public void deleteAllExceptProtectedSpecialCells() {
+    public void deleteAllExceptProtectedDistinctCells() {
         for (int i = 0; i <= (gridSize - 1); i = i + 1) {
-            if (!cells[i].isProtectedSpecial()) {
+            if (!cells[i].isProtectedDistinct()) {
                 cells[i].empty();
             }
         }
-        linkCells();
     }
 
     public void deleteAllCells() {
         for (int i = 0; i <= (gridSize - 1); i = i + 1) {
             cells[i].empty();
         }
-        linkCells();
     }
 
-    public void setProtectedNormalCellsToProtectedSpecial() {
+    public void setProtectedCellsNormalToDistinct() {
         for (int i = 0; i <= (gridSize - 1); i = i + 1) {
             if (cells[i].isProtectedNormal()) {
-                cells[i].protectSpecial();
+                cells[i].protectDistinct();
             }
         }
     }
@@ -109,9 +102,9 @@ public class CellsHandler {
 
     private void prepareCellsForSolver() {
         for (int i = 0; i <= (gridSize - 1); i = i + 1) {
-            cells[i].rowDigitRoomIndex = i / gridRows;   //  (n° de ligne (0..8)) dans la grille
-            cells[i].colDigitRoomIndex = (i % gridRows) + gridRows;     //  (9 + n° de colonne (0..8)) dans la grille
-            cells[i].squareDigitRoomIndex = squareRows * ((i / gridRows) / squareRows) + ((i % gridRows) / squareRows) + 2 * gridRows;   //  (18 + n° de carré (0..8)) dans la grille
+            cells[i].rowDigitBoxIndex = i / gridRows;   //  (n° de ligne (0..8)) dans la grille
+            cells[i].colDigitBoxIndex = (i % gridRows) + gridRows;     //  (9 + n° de colonne (0..8)) dans la grille
+            cells[i].squareDigitBoxIndex = squareRows * ((i / gridRows) / squareRows) + ((i % gridRows) / squareRows) + 2 * gridRows;   //  (18 + n° de carré (0..8)) dans la grille
         }
     }
 

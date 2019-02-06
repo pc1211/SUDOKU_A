@@ -14,7 +14,7 @@ public class Solver {
     private onSolveEndListener mOnSolveEndListener;
 
     //region Constantes
-    private final boolean DIGIT_ROOM_FREE = false;
+    private final boolean DIGIT_BOX_FREE = false;
     //endregion
 
     //region Variables
@@ -22,7 +22,7 @@ public class Solver {
     private CellsHandler cellsHandler;
     private int pointer;
     private SOLVE_STATES solveState;
-    private boolean[][] digitRooms;
+    private boolean[][] digitBoxes;
     private int gridRows;
     private int gridSize;
     //endregion
@@ -41,13 +41,13 @@ public class Solver {
 
     public void close() {
         cellsHandler = null;
-        digitRooms = null;
+        digitBoxes = null;
         cells = null;
     }
 
     public void reset() {
-        setupDigitRooms();
-        populateDigitRooms();
+        setupDigitBoxes();
+        populateDigitBoxes();
         pointer = cellsHandler.getFirstUnprotectedCellIndex();
         if ((pointer >= 0) && (pointer < gridSize)) {
             solveState = SOLVE_STATES.UNKNOWN;
@@ -85,7 +85,7 @@ public class Solver {
                 pointerOverflow = false;
                 Cell currentCell = cells[pointer];
                 if (!currentCell.isEmpty()) {
-                    freeDigitRoom(currentCell);
+                    freeDigitBox(currentCell);
                 }
                 do {
                     cellUnique = false;
@@ -104,7 +104,7 @@ public class Solver {
                     }
                 } while ((!cellUnique) && (!digitOverflow));
                 if (cellUnique) {
-                    bookDigitRoom(currentCell);
+                    bookDigitBox(currentCell);
                     if (pointer != lastUnprotectedCellIndex) {
                         pointer = currentCell.nextUnprotectedCellIndex;
                     } else {
@@ -132,42 +132,42 @@ public class Solver {
     }
 
     public boolean isCellUniqueInRow(Cell cell) {
-        return (!digitRooms[cell.rowDigitRoomIndex][cell.value]);
+        return (!digitBoxes[cell.rowDigitBoxIndex][cell.value]);
     }
 
     public boolean isCellUniqueInColumn(Cell cell) {
-        return (!digitRooms[cell.colDigitRoomIndex][cell.value]);
+        return (!digitBoxes[cell.colDigitBoxIndex][cell.value]);
     }
 
     public boolean isCellUniqueInSquare(Cell cell) {
-        return (!digitRooms[cell.squareDigitRoomIndex][cell.value]);
+        return (!digitBoxes[cell.squareDigitBoxIndex][cell.value]);
     }
 
-    public void bookDigitRoom(Cell cell) {
-        digitRooms[cell.rowDigitRoomIndex][cell.value] = !DIGIT_ROOM_FREE;
-        digitRooms[cell.colDigitRoomIndex][cell.value] = !DIGIT_ROOM_FREE;
-        digitRooms[cell.squareDigitRoomIndex][cell.value] = !DIGIT_ROOM_FREE;
+    private void bookDigitBox(Cell cell) {
+        digitBoxes[cell.rowDigitBoxIndex][cell.value] = !DIGIT_BOX_FREE;
+        digitBoxes[cell.colDigitBoxIndex][cell.value] = !DIGIT_BOX_FREE;
+        digitBoxes[cell.squareDigitBoxIndex][cell.value] = !DIGIT_BOX_FREE;
     }
 
-    public void freeDigitRoom(Cell cell) {
-        digitRooms[cell.rowDigitRoomIndex][cell.value] = DIGIT_ROOM_FREE;
-        digitRooms[cell.colDigitRoomIndex][cell.value] = DIGIT_ROOM_FREE;
-        digitRooms[cell.squareDigitRoomIndex][cell.value] = DIGIT_ROOM_FREE;
+    private void freeDigitBox(Cell cell) {
+        digitBoxes[cell.rowDigitBoxIndex][cell.value] = DIGIT_BOX_FREE;
+        digitBoxes[cell.colDigitBoxIndex][cell.value] = DIGIT_BOX_FREE;
+        digitBoxes[cell.squareDigitBoxIndex][cell.value] = DIGIT_BOX_FREE;
     }
 
-    private void setupDigitRooms() {
-        digitRooms = new boolean[3 * gridRows][1 + gridRows];
-        for (int i = 0; i <= (digitRooms.length - 1); i = i + 1) {   //  En ligne: (n° de ligne (0..8)), (9 + n°de colonne (0..8)) ou (18 + n° de carré (0..8)) dans la grille
-            for (int j = 0; j <= (digitRooms[0].length - 1); j = j + 1) {   //  En colonne: (1 + cell.value (1..9))
-                digitRooms[i][j] = DIGIT_ROOM_FREE;
+    private void setupDigitBoxes() {
+        digitBoxes = new boolean[3 * gridRows][1 + gridRows];
+        for (int i = 0; i <= (digitBoxes.length - 1); i = i + 1) {   //  En ligne: (n° de ligne (0..8)), (9 + n°de colonne (0..8)) ou (18 + n° de carré (0..8)) dans la grille
+            for (int j = 0; j <= (digitBoxes[0].length - 1); j = j + 1) {   //  En colonne: (1 + cell.value (1..9))
+                digitBoxes[i][j] = DIGIT_BOX_FREE;
             }
         }
     }
 
-    private void populateDigitRooms() {
+    private void populateDigitBoxes() {
         for (int i = 0; i <= (gridSize - 1); i = i + 1) {
             if (!cells[i].isEmpty()) {
-                bookDigitRoom(cells[i]);
+                bookDigitBox(cells[i]);
             }
         }
     }

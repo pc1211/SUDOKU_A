@@ -3,7 +3,7 @@ package com.example.pgyl.sudoku_a;
 public class Cell {
     //region Constantes
     private enum STATUS {
-        UNPROTECTED, PROTECTED_NORMAL, PROTECTED_SPECIAL;
+        UNPROTECTED, PROTECTED_NORMAL, PROTECTED_DISTINCT;
 
         public int getValue() {
             return ordinal();
@@ -17,9 +17,9 @@ public class Cell {
     public int pointer;
     public int value;
     private int status;
-    public int rowDigitRoomIndex;
-    public int colDigitRoomIndex;
-    public int squareDigitRoomIndex;
+    public int rowDigitBoxIndex;
+    public int colDigitBoxIndex;
+    public int squareDigitBoxIndex;
     public int nextUnprotectedCellIndex;
     public int previousUnprotectedCellIndex;
     //endregion
@@ -40,9 +40,9 @@ public class Cell {
     private void init() {
         final int INDEX_DEFAULT_VALUE = 0;
 
-        rowDigitRoomIndex = INDEX_DEFAULT_VALUE;
-        colDigitRoomIndex = INDEX_DEFAULT_VALUE;
-        squareDigitRoomIndex = INDEX_DEFAULT_VALUE;
+        rowDigitBoxIndex = INDEX_DEFAULT_VALUE;
+        colDigitBoxIndex = INDEX_DEFAULT_VALUE;
+        squareDigitBoxIndex = INDEX_DEFAULT_VALUE;
         nextUnprotectedCellIndex = INDEX_DEFAULT_VALUE;
         previousUnprotectedCellIndex = INDEX_DEFAULT_VALUE;
     }
@@ -68,8 +68,8 @@ public class Cell {
         return (status == STATUS.PROTECTED_NORMAL.getValue());
     }
 
-    public boolean isProtectedSpecial() {
-        return (status == STATUS.PROTECTED_SPECIAL.getValue());
+    public boolean isProtectedDistinct() {
+        return (status == STATUS.PROTECTED_DISTINCT.getValue());
     }
 
     public void unprotect() {
@@ -80,8 +80,8 @@ public class Cell {
         status = STATUS.PROTECTED_NORMAL.getValue();
     }
 
-    public void protectSpecial() {
-        status = STATUS.PROTECTED_SPECIAL.getValue();
+    public void protectDistinct() {
+        status = STATUS.PROTECTED_DISTINCT.getValue();
     }
 
 }
