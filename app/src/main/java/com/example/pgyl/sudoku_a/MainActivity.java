@@ -270,7 +270,7 @@ public class MainActivity extends Activity {
     private String testCellContents(Cell cell, int newValue) {
         String ret = "";
         int oldCellValue = cell.value;
-        boolean oldEmpty = cell.isEmpty();
+        boolean oldIsEmpty = cell.isEmpty();
         if (!cell.isEmpty()) {
             solver.freeDigitRoom(cell);
         }
@@ -289,7 +289,7 @@ public class MainActivity extends Activity {
         }
 
         cell.value = oldCellValue;       //  Remettre tout en état
-        if (!oldEmpty) {
+        if (!oldIsEmpty) {
             solver.bookDigitRoom(cell);
         }
         return ret;

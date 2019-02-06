@@ -79,13 +79,13 @@ public class CellsHandler {
     private void prepareCellsForSolver() {
         for (int i = 0; i <= (gridSize - 1); i = i + 1) {
             cells[i].rowDigitRoomIndex = i / gridRows;   //  (n° de ligne (0..8)) dans la grille
-            cells[i].colDigitRoomIndex = i % gridRows + gridRows;     //  (9 + n° de colonne (0..8)) dans la grille
+            cells[i].colDigitRoomIndex = (i % gridRows) + gridRows;     //  (9 + n° de colonne (0..8)) dans la grille
             cells[i].squareDigitRoomIndex = squareRows * ((i / gridRows) / squareRows) + ((i % gridRows) / squareRows) + 2 * gridRows;   //  (18 + n° de carré (0..8)) dans la grille
         }
     }
 
     private void linkCells() {
-        boolean p;
+        boolean isProtected;
 
         int lastCellIndex = -1;
         firstUnprotectedCellIndex = -1;
@@ -93,12 +93,12 @@ public class CellsHandler {
         int i = 0;
         do {
             do {
-                p = (cells[i].isProtected());
-                if (p) {
+                isProtected = cells[i].isProtected();
+                if (isProtected) {
                     i = i + 1;
                 }
             }
-            while ((i < gridSize) & (p));
+            while ((i < gridSize) & (isProtected));
             if (i < gridSize) {
                 if (lastCellIndex != -1) {
                     cells[lastCellIndex].nextUnprotectedCellIndex = i;

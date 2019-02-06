@@ -14,7 +14,7 @@ public class Solver {
     private onSolveEndListener mOnSolveEndListener;
 
     //region Constantes
-    private final boolean DIGIT_ROOM_FREE = true;
+    private final boolean DIGIT_ROOM_FREE = false;
     //endregion
 
     //region Variables
@@ -79,6 +79,8 @@ public class Solver {
 
         if (!solveState.equals(SOLVE_STATES.IMPOSSIBLE)) {
             solveState = SOLVE_STATES.UNKNOWN;
+            int lastUnprotectedCellIndex = cellsHandler.getLastUnprotectedCellIndex();
+            int firstUnprotectedCellIndex = cellsHandler.getFirstUnprotectedCellIndex();
             do {
                 pointerOverflow = false;
                 Cell currentCell = cells[pointer];
@@ -103,14 +105,14 @@ public class Solver {
                 } while ((!cellUnique) && (!digitOverflow));
                 if (cellUnique) {
                     bookDigitRoom(currentCell);
-                    if (pointer != cellsHandler.getLastUnprotectedCellIndex()) {
+                    if (pointer != lastUnprotectedCellIndex) {
                         pointer = currentCell.nextUnprotectedCellIndex;
                     } else {
                         pointerOverflow = true;
                     }
                 } else {
                     currentCell.empty();
-                    if (pointer != cellsHandler.getFirstUnprotectedCellIndex()) {
+                    if (pointer != firstUnprotectedCellIndex) {
                         pointer = currentCell.previousUnprotectedCellIndex;
                     } else {
                         solveState = SOLVE_STATES.IMPOSSIBLE;
@@ -118,7 +120,7 @@ public class Solver {
                 }
             } while ((!pointerOverflow) && (!solveState.equals(SOLVE_STATES.IMPOSSIBLE)));
             if (pointerOverflow) {
-                pointer = cellsHandler.getLastUnprotectedCellIndex();
+                pointer = lastUnprotectedCellIndex;
                 solveState = SOLVE_STATES.SOLUTION_FOUND;
             }
         } else {
@@ -130,15 +132,15 @@ public class Solver {
     }
 
     public boolean isCellUniqueInRow(Cell cell) {
-        return (digitRooms[cell.rowDigitRoomIndex][cell.value]);
+        return (!digitRooms[cell.rowDigitRoomIndex][cell.value]);
     }
 
     public boolean isCellUniqueInColumn(Cell cell) {
-        return (digitRooms[cell.colDigitRoomIndex][cell.value]);
+        return (!digitRooms[cell.colDigitRoomIndex][cell.value]);
     }
 
     public boolean isCellUniqueInSquare(Cell cell) {
-        return (digitRooms[cell.squareDigitRoomIndex][cell.value]);
+        return (!digitRooms[cell.squareDigitRoomIndex][cell.value]);
     }
 
     public void bookDigitRoom(Cell cell) {
