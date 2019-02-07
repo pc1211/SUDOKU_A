@@ -3,7 +3,7 @@ package com.example.pgyl.sudoku_a;
 public class Cell {
     //region Constantes
     private enum STATUS {
-        UNPROTECTED, PROTECTED_NORMAL, PROTECTED_DISTINCT;
+        UNPROTECTED, PROTECTED;
 
         public int getValue() {
             return ordinal();
@@ -61,27 +61,15 @@ public class Cell {
     }
 
     public boolean isProtected() {
-        return (status != STATUS.UNPROTECTED.getValue());
-    }
-
-    public boolean isProtectedNormal() {
-        return (status == STATUS.PROTECTED_NORMAL.getValue());
-    }
-
-    public boolean isProtectedDistinct() {
-        return (status == STATUS.PROTECTED_DISTINCT.getValue());
+        return (status == STATUS.PROTECTED.getValue());
     }
 
     public void unprotect() {
         status = STATUS.UNPROTECTED.getValue();
     }
 
-    public void protectNormal() {
-        status = STATUS.PROTECTED_NORMAL.getValue();
-    }
-
-    public void protectDistinct() {
-        status = STATUS.PROTECTED_DISTINCT.getValue();
+    public void protect() {
+        status = STATUS.PROTECTED.getValue();
     }
 
 }

@@ -47,25 +47,9 @@ public class CellsHandler {
         }
     }
 
-    public void deleteAllExceptProtectedDistinctCells() {
-        for (int i = 0; i <= (gridSize - 1); i = i + 1) {
-            if (!cells[i].isProtectedDistinct()) {
-                cells[i].empty();
-            }
-        }
-    }
-
     public void deleteAllCells() {
         for (int i = 0; i <= (gridSize - 1); i = i + 1) {
             cells[i].empty();
-        }
-    }
-
-    public void setProtectedCellsNormalToDistinct() {
-        for (int i = 0; i <= (gridSize - 1); i = i + 1) {
-            if (cells[i].isProtectedNormal()) {
-                cells[i].protectDistinct();
-            }
         }
     }
 

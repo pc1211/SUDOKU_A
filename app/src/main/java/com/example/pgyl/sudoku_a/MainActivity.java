@@ -6,6 +6,7 @@ import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -14,42 +15,30 @@ import android.view.Window;
 import android.view.WindowManager;
 
 import com.example.pgyl.pekislib_a.Constants.ACTIVITY_EXTRA_KEYS;
-import com.example.pgyl.pekislib_a.Constants.PEKISLIB_ACTIVITIES;
 import com.example.pgyl.pekislib_a.CustomButton;
 import com.example.pgyl.pekislib_a.HelpActivity;
 import com.example.pgyl.pekislib_a.HelpActivity.HELP_ACTIVITY_EXTRA_KEYS;
-import com.example.pgyl.pekislib_a.InputButtonsActivity;
 import com.example.pgyl.pekislib_a.StringShelfDatabase;
-import com.example.pgyl.pekislib_a.StringShelfDatabaseUtils.ACTIVITY_START_STATUS;
-import com.example.pgyl.pekislib_a.StringShelfDatabaseUtils.TABLE_EXTRA_KEYS;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import static com.example.pgyl.pekislib_a.Constants.BUTTON_STATES;
+import static com.example.pgyl.pekislib_a.Constants.COLOR_PREFIX;
 import static com.example.pgyl.pekislib_a.Constants.SHP_FILE_NAME_SUFFIX;
 import static com.example.pgyl.pekislib_a.HelpActivity.HELP_ACTIVITY_TITLE;
 import static com.example.pgyl.pekislib_a.MiscUtils.msgBox;
-import static com.example.pgyl.pekislib_a.StringShelfDatabaseUtils.createTableActivityInfosIfNotExists;
-import static com.example.pgyl.pekislib_a.StringShelfDatabaseUtils.getCurrentStringInInputButtonsActivity;
-import static com.example.pgyl.pekislib_a.StringShelfDatabaseUtils.setCurrentStringInInputButtonsActivity;
-import static com.example.pgyl.pekislib_a.StringShelfDatabaseUtils.setStartStatusInInputButtonsActivity;
-import static com.example.pgyl.pekislib_a.StringShelfDatabaseUtils.tableActivityInfosExists;
 import static com.example.pgyl.sudoku_a.StringShelfDatabaseUtils.cellRowsToCells;
 import static com.example.pgyl.sudoku_a.StringShelfDatabaseUtils.cellsToCellRows;
 import static com.example.pgyl.sudoku_a.StringShelfDatabaseUtils.createTableCellsIfNotExists;
-import static com.example.pgyl.sudoku_a.StringShelfDatabaseUtils.getCellValueIndex;
-import static com.example.pgyl.sudoku_a.StringShelfDatabaseUtils.getCellsTableName;
 import static com.example.pgyl.sudoku_a.StringShelfDatabaseUtils.initializeTableCells;
-import static com.example.pgyl.sudoku_a.StringShelfDatabaseUtils.isColdStartStatusInMainActivity;
 import static com.example.pgyl.sudoku_a.StringShelfDatabaseUtils.saveCells;
-import static com.example.pgyl.sudoku_a.StringShelfDatabaseUtils.setStartStatusInMainActivity;
 import static com.example.pgyl.sudoku_a.StringShelfDatabaseUtils.tableCellsExists;
 
 public class MainActivity extends Activity {
     //region Constantes
     private enum COMMANDS {
-        PROTECTED_DISTINCT, SOLVE;
+        RESET, RESET_U, SOLVE;
 
         public int INDEX() {
             return ordinal();
@@ -63,18 +52,20 @@ public class MainActivity extends Activity {
     private final int SQUARE_ROWS = 3;
     private final int GRID_ROWS = SQUARE_ROWS * SQUARE_ROWS;
     private final int GRID_SIZE = GRID_ROWS * GRID_ROWS;
+    private final int DELETE_DIGIT_KEYBOARD_BUTTON_INDEX = 0;
+    private final String DELETE_DIGIT_KEYBOARD_BUTTON_VALUE = "X";
+    private final int NO_EDIT_POINTER = -1;
     //endregion
     //region Variables
-    private CustomButton[] buttons;
-    private CustomButton[] gridButtons;
+    private CustomButton[] cellButtons;
+    private CustomButton[] keyboardButtons;
+    private CustomButton[] commandButtons;
     private Cell[] cells;
     private Solver solver;
     private CellsHandler cellsHandler;
     private Menu menu;
     private MenuItem barMenuItemKeepScreen;
     private StringShelfDatabase stringShelfDatabase;
-    private boolean validReturnFromCalledActivity;
-    private String calledActivity;
     private String shpFileName;
     private boolean keepScreen;
     private SOLVE_STATES solveState;
@@ -90,9 +81,9 @@ public class MainActivity extends Activity {
         getWindow().requestFeature(Window.FEATURE_ACTION_BAR);
         getActionBar().setTitle(ACTIVITY_TITLE);
         setContentView(R.layout.activity_main);
-        setupButtons();
-        setupGridButtons();
-        validReturnFromCalledActivity = false;
+        setupCellButtons();
+        setupKeyboardButtons();
+        setupCommandButtons();
     }
 
     @Override
@@ -124,40 +115,21 @@ public class MainActivity extends Activity {
         cells = cellRowsToCells(StringShelfDatabaseUtils.getCells(stringShelfDatabase));
         setupCellsHandler();
         setupSolver();
-        setupButtonColors();
-        setupGridButtonColors();
+        setupCellButtonColors();
+        setupKeyboardButtonColors();
+        setupCommandButtonColors();
 
-        if (isColdStartStatusInMainActivity(stringShelfDatabase)) {
-            setStartStatusInMainActivity(stringShelfDatabase, ACTIVITY_START_STATUS.HOT);
-        } else {
-            solveState = getSHPSolveState();
-            pointer = getSHPPointer();
-            editPointer = getSHPEditPointer();
-            solver.setPointer(pointer);
-            solver.setSolveState(solveState);
-            if (validReturnFromCalledActivity) {
-                validReturnFromCalledActivity = false;
-                if (returnsFromInputButtonsActivity()) {
-                    handleCellInput(getCurrentStringInInputButtonsActivity(stringShelfDatabase, getCellsTableName(), getCellValueIndex()));
-                }
-            }
-        }
-        updateDisplayGridButtonTexts();
-        updateDisplayGridButtonColors();
-        updateDisplayButtonColors();
+        solveState = getSHPSolveState();
+        pointer = getSHPPointer();
+        editPointer = getSHPEditPointer();
+        solver.setPointer(pointer);
+        solver.setSolveState(solveState);
+
+        updateDisplayCellButtonTexts();
+        updateDisplayCellButtonColors();
+        updateDisplayCommandButtonColors();
         updateDisplayKeepScreen();
         invalidateOptionsMenu();
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent returnIntent) {
-        validReturnFromCalledActivity = false;
-        if (requestCode == PEKISLIB_ACTIVITIES.INPUT_BUTTONS.INDEX()) {
-            calledActivity = PEKISLIB_ACTIVITIES.INPUT_BUTTONS.toString();
-            if (resultCode == RESULT_OK) {
-                validReturnFromCalledActivity = true;
-            }
-        }
     }
 
     @Override
@@ -182,40 +154,6 @@ public class MainActivity extends Activity {
             updateDisplayKeepScreen();
             updateDisplayKeepScreenBarMenuItemIcon(keepScreen);
         }
-        if ((item.getItemId() == R.id.DELETE_ALL_EXCEPT_PROTECTED_NORMAL) || (item.getItemId() == R.id.DELETE_ALL_EXCEPT_PROTECTED_DISTINCT) || (item.getItemId() == R.id.DELETE_ALL)) {
-            AlertDialog.Builder builder = new AlertDialog.Builder(this);
-            builder.setTitle(item.getTitle());
-            builder.setMessage("Are you sure ?");
-            builder.setCancelable(false);
-            final MenuItem it = item;
-            builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialogInterface, int id) {
-                    if (it.getItemId() == R.id.DELETE_ALL_EXCEPT_PROTECTED_NORMAL) {
-                        cellsHandler.deleteAllExceptProtectedCells();
-                    }
-                    if (it.getItemId() == R.id.DELETE_ALL_EXCEPT_PROTECTED_DISTINCT) {
-                        cellsHandler.deleteAllExceptProtectedDistinctCells();
-                    }
-                    if (it.getItemId() == R.id.DELETE_ALL) {
-                        cellsHandler.deleteAllCells();
-                    }
-                    cellsHandler.linkCells();
-                    solver.reset();
-                }
-            });
-            builder.setNegativeButton("No", null);
-            Dialog dialog = builder.create();
-            dialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
-                @Override
-                public void onDismiss(DialogInterface dialogInterface) {    // OK pour modifier UI sous-jacente à la boîte de dialogue
-                    updateDisplayGridButtonTexts();
-                    updateDisplayGridButtonColors();
-                    updateDisplayButtonColors();
-                }
-            });
-            dialog.show();
-        }
         if (item.getItemId() == R.id.HELP) {
             launchHelpActivity();
             return true;
@@ -227,25 +165,73 @@ public class MainActivity extends Activity {
         return super.onOptionsItemSelected(item);
     }
 
-    private void onButtonClick(COMMANDS command) {
-        if (command.equals(COMMANDS.PROTECTED_DISTINCT)) {
-            cellsHandler.setProtectedCellsNormalToDistinct();
-            updateDisplayGridButtonColors();
+    private void onCellButtonClick(int index) {
+        if (editPointer != NO_EDIT_POINTER) {
+            if (editPointer != index) {
+                updateDisplayCellButtonColor(editPointer);    //  Ancienne cellule Rouge -> Normal
+                editPointer = index;
+                updateDisplayCellButtonColor(editPointer);    //  Nouvelle cellule Normal-> Rouge
+            } else {
+                editPointer = NO_EDIT_POINTER;
+                updateDisplayCellButtonColor(index);          //  Même cellule Rouge -> Normal
+            }
+        } else {
+            editPointer = index;
+            updateDisplayCellButtonColor(editPointer);        //  Cellule Normal -> Rouge
+        }
+    }
+
+    private void onKeyboardButtonClick(String input) {
+        if (editPointer != NO_EDIT_POINTER) {
+            handleCellInput(input);
+            updateDisplayCellButtonText(editPointer);
+            int oldEditPointer = editPointer;
+            editPointer = NO_EDIT_POINTER;
+            updateDisplayCellButtonColor(oldEditPointer);     //  Cellule Rouge -> Normal
+        }
+    }
+
+    private void onCommandButtonClick(COMMANDS command) {
+        if ((command.equals(COMMANDS.RESET)) || (command.equals(COMMANDS.RESET_U))) {
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            String title = ((command.equals(COMMANDS.RESET)) ? "Delete all cells" : "Delete all Unprotected cells");
+            builder.setTitle(title);
+            builder.setMessage("Are you sure ?");
+            builder.setCancelable(false);
+            final COMMANDS cmd = command;
+            builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialogInterface, int id) {
+                    if (cmd.equals(COMMANDS.RESET)) {
+                        cellsHandler.deleteAllCells();
+                    }
+                    if (cmd.equals(COMMANDS.RESET_U)) {
+                        cellsHandler.deleteAllExceptProtectedCells();
+                    }
+                    cellsHandler.linkCells();
+                    solver.reset();
+                }
+            });
+            builder.setNegativeButton("No", null);
+            Dialog dialog = builder.create();
+            dialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
+                @Override
+                public void onDismiss(DialogInterface dialogInterface) {    // OK pour modifier UI sous-jacente à la boîte de dialogue
+                    updateDisplayCellButtonTexts();
+                    updateDisplayCellButtonColors();
+                    updateDisplayCommandButtonColors();
+                }
+            });
+            dialog.show();
         }
         if (command.equals(COMMANDS.SOLVE)) {
             solver.solve();
         }
     }
 
-    private void onGridButtonClick(int index) {
-        editPointer = index;
-        setCurrentStringInInputButtonsActivity(stringShelfDatabase, getCellsTableName(), getCellValueIndex(), String.valueOf(cells[editPointer].value));
-        launchInputButtonsActivity();
-    }
-
     private void onSolverEnd() {
-        updateDisplayGridButtonTexts();
-        updateDisplayButtonColors();
+        updateDisplayCellButtonTexts();
+        updateDisplayCommandButtonColors();
     }
 
     private void handleCellInput(String input) {
@@ -254,11 +240,11 @@ public class MainActivity extends Activity {
         cellsHandler.deleteAllExceptProtectedCells();
         cellsHandler.linkCells();
         solver.reset();
-        if (input.length() >= 1) {
+        if (!input.equals(DELETE_DIGIT_KEYBOARD_BUTTON_VALUE)) {
             editCell.value = Integer.parseInt(input);
             String errorMsg = reportUniqueCellValue(editCell);
             if (errorMsg.equals("")) {     //  cas pas de remarques
-                editCell.protectNormal();
+                editCell.protect();
             } else {
                 msgBox(errorMsg, this);
                 editCell.empty();
@@ -285,7 +271,7 @@ public class MainActivity extends Activity {
         return ret;
     }
 
-    private void updateDisplayButtonColors() {
+    private void updateDisplayCommandButtonColors() {
         final String SOLUTION_FOUND_UNPRESSED_COLOR = "00B777";   //  Vert
         final String SOLUTION_FOUND_PRESSED_COLOR = "006944";
         final String IMPOSSIBLE_UNPRESSED_COLOR = "FF0000";       //  Rouge
@@ -294,61 +280,60 @@ public class MainActivity extends Activity {
         for (final COMMANDS command : COMMANDS.values()) {
             if (command.equals(COMMANDS.SOLVE)) {
                 if (solver.getSolveState().equals(SOLVE_STATES.SOLUTION_FOUND)) {
-                    buttons[command.INDEX()].setUnpressedColor(SOLUTION_FOUND_UNPRESSED_COLOR);
-                    buttons[command.INDEX()].setPressedColor(SOLUTION_FOUND_PRESSED_COLOR);
+                    commandButtons[command.INDEX()].setUnpressedColor(SOLUTION_FOUND_UNPRESSED_COLOR);
+                    commandButtons[command.INDEX()].setPressedColor(SOLUTION_FOUND_PRESSED_COLOR);
                 }
                 if (solver.getSolveState().equals(SOLVE_STATES.IMPOSSIBLE)) {
-                    buttons[command.INDEX()].setUnpressedColor(IMPOSSIBLE_UNPRESSED_COLOR);
-                    buttons[command.INDEX()].setPressedColor(IMPOSSIBLE_PRESSED_COLOR);
+                    commandButtons[command.INDEX()].setUnpressedColor(IMPOSSIBLE_UNPRESSED_COLOR);
+                    commandButtons[command.INDEX()].setPressedColor(IMPOSSIBLE_PRESSED_COLOR);
                 }
                 if (solver.getSolveState().equals(SOLVE_STATES.UNKNOWN)) {
-                    buttons[command.INDEX()].setUnpressedColor(BUTTON_STATES.UNPRESSED.DEFAULT_COLOR());
-                    buttons[command.INDEX()].setPressedColor(BUTTON_STATES.PRESSED.DEFAULT_COLOR());
+                    commandButtons[command.INDEX()].setUnpressedColor(BUTTON_STATES.UNPRESSED.DEFAULT_COLOR());
+                    commandButtons[command.INDEX()].setPressedColor(BUTTON_STATES.PRESSED.DEFAULT_COLOR());
                 }
             }
-            buttons[command.INDEX()].updateColor();
+            commandButtons[command.INDEX()].updateColor();
         }
     }
 
-    private void updateDisplayGridButtonColors() {
+    private void updateDisplayCellButtonColors() {
         for (int i = 0; i <= (GRID_SIZE - 1); i = i + 1) {
-            updateDisplayGridButtonColor(i);
+            updateDisplayCellButtonColor(i);
         }
     }
 
-    private void updateDisplayGridButtonColor(int index) {
-        final String PROTECTED_NORMAL_TEMPORARY_UNPRESSED_COLOR = "FF9A22";            //  Orange
-        final String PROTECTED_NORMAL_PRESSED_COLOR = "995400";
-        final String PROTECTED_DISTINCT_UNPRESSED_COLOR_DEFAULT = "668CFF";    // Bleu
-        final String PROTECTED_DISTINCT_PRESSED_COLOR_DEFAULT = "0040FF";
+    private void updateDisplayCellButtonColor(int index) {
+        final String PROTECTED_UNPRESSED_COLOR = "FF9A22";         //  Orange
+        final String PROTECTED_PRESSED_COLOR = "995400";
+        final String ENABLE_EDIT_UNPRESSED_COLOR = "FF0000";       //  Rouge
+        final String ENABLE_EDIT_PRESSED_COLOR = "940000";
 
-        if (!cells[index].isProtected()) {
-            gridButtons[index].setUnpressedColor(BUTTON_STATES.UNPRESSED.DEFAULT_COLOR());
-            gridButtons[index].setPressedColor(BUTTON_STATES.PRESSED.DEFAULT_COLOR());
+        if (editPointer == index) {
+            cellButtons[index].setUnpressedColor(ENABLE_EDIT_UNPRESSED_COLOR);
+            cellButtons[index].setPressedColor(ENABLE_EDIT_PRESSED_COLOR);
         } else {
-            if (cells[index].isProtectedDistinct()) {
-                gridButtons[index].setUnpressedColor(PROTECTED_DISTINCT_UNPRESSED_COLOR_DEFAULT);
-                gridButtons[index].setPressedColor(PROTECTED_DISTINCT_PRESSED_COLOR_DEFAULT);
-            }
-            if (cells[index].isProtectedNormal()) {
-                gridButtons[index].setUnpressedColor(PROTECTED_NORMAL_TEMPORARY_UNPRESSED_COLOR);
-                gridButtons[index].setPressedColor(PROTECTED_NORMAL_PRESSED_COLOR);
+            if (!cells[index].isProtected()) {
+                cellButtons[index].setUnpressedColor(BUTTON_STATES.UNPRESSED.DEFAULT_COLOR());
+                cellButtons[index].setPressedColor(BUTTON_STATES.PRESSED.DEFAULT_COLOR());
+            } else {
+                cellButtons[index].setUnpressedColor(PROTECTED_UNPRESSED_COLOR);
+                cellButtons[index].setPressedColor(PROTECTED_PRESSED_COLOR);
             }
         }
-        gridButtons[index].updateColor();
+        cellButtons[index].updateColor();
     }
 
-    private void updateDisplayGridButtonTexts() {
+    private void updateDisplayCellButtonTexts() {
         for (int i = 0; i <= (GRID_SIZE - 1); i = i + 1) {
-            updateDisplayGridButtonText(i);
+            updateDisplayCellButtonText(i);
         }
     }
 
-    private void updateDisplayGridButtonText(int index) {
+    private void updateDisplayCellButtonText(int index) {
         if (cells[index].isEmpty()) {
-            gridButtons[index].setText("");
+            cellButtons[index].setText("");
         } else {
-            gridButtons[index].setText(String.valueOf(cells[index].value));
+            cellButtons[index].setText(String.valueOf(cells[index].value));
         }
     }
 
@@ -386,7 +371,7 @@ public class MainActivity extends Activity {
 
     private int getSHPEditPointer() {
         SharedPreferences shp = getSharedPreferences(shpFileName, MODE_PRIVATE);
-        return shp.getInt(SUDOKU_SHP_KEY_NAMES.EDIT_POINTER.toString(), 0);
+        return shp.getInt(SUDOKU_SHP_KEY_NAMES.EDIT_POINTER.toString(), -1);
     }
 
     private boolean getSHPKeepScreen() {
@@ -410,21 +395,81 @@ public class MainActivity extends Activity {
         });
     }
 
-    private void setupButtons() {
+    private void setupCellButtons() {
+        final String CELL_BUTTON_XML_PREFIX = "BTN_P";
+        final long BUTTON_MIN_CLICK_TIME_INTERVAL_MS = 500;
+
+        cellButtons = new CustomButton[GRID_SIZE];
+        Class rid = R.id.class;
+        for (int i = 0; i <= (GRID_SIZE - 1); i = i + 1) {
+            try {
+                cellButtons[i] = findViewById(rid.getField(CELL_BUTTON_XML_PREFIX + (i + 1)).getInt(rid));  // BTN_P1, BTN_P2, ...
+                cellButtons[i].setMinClickTimeInterval(BUTTON_MIN_CLICK_TIME_INTERVAL_MS);
+                final int index = i;
+                cellButtons[i].setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        onCellButtonClick(index);
+                    }
+                });
+            } catch (IllegalAccessException ex) {
+                Logger.getLogger(MainActivity.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (IllegalArgumentException ex) {
+                Logger.getLogger(MainActivity.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (NoSuchFieldException ex) {
+                Logger.getLogger(MainActivity.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (SecurityException ex) {
+                Logger.getLogger(MainActivity.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+    }
+
+    private void setupKeyboardButtons() {
+        final String KEYBOARD_BUTTON_XML_PREFIX = "BTN_K";
+        final long BUTTON_MIN_CLICK_TIME_INTERVAL_MS = 500;
+
+        keyboardButtons = new CustomButton[GRID_ROWS + 1];
+        Class rid = R.id.class;
+        for (int i = 0; i <= (GRID_ROWS); i = i + 1) {   //  10 boutons: X, 1, 2, ... 9
+            try {
+                keyboardButtons[i] = findViewById(rid.getField(KEYBOARD_BUTTON_XML_PREFIX + (i + 1)).getInt(rid));  // BTN_K1, BTN_K2, ...
+                final String value = ((i == DELETE_DIGIT_KEYBOARD_BUTTON_INDEX) ? DELETE_DIGIT_KEYBOARD_BUTTON_VALUE : String.valueOf(i));
+                keyboardButtons[i].setText(value);
+                keyboardButtons[i].setMinClickTimeInterval(BUTTON_MIN_CLICK_TIME_INTERVAL_MS);
+                final int index = i;
+                keyboardButtons[i].setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        onKeyboardButtonClick(value);
+                    }
+                });
+            } catch (IllegalAccessException ex) {
+                Logger.getLogger(MainActivity.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (IllegalArgumentException ex) {
+                Logger.getLogger(MainActivity.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (NoSuchFieldException ex) {
+                Logger.getLogger(MainActivity.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (SecurityException ex) {
+                Logger.getLogger(MainActivity.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+    }
+
+    private void setupCommandButtons() {
         final String BUTTON_COMMAND_XML_PREFIX = "BTN_";
         final long BUTTON_MIN_CLICK_TIME_INTERVAL_MS = 500;
 
-        buttons = new CustomButton[COMMANDS.values().length];
+        commandButtons = new CustomButton[COMMANDS.values().length];
         Class rid = R.id.class;
         for (COMMANDS command : COMMANDS.values())
             try {
-                buttons[command.INDEX()] = findViewById(rid.getField(BUTTON_COMMAND_XML_PREFIX + command.toString()).getInt(rid));
-                buttons[command.INDEX()].setMinClickTimeInterval(BUTTON_MIN_CLICK_TIME_INTERVAL_MS);
+                commandButtons[command.INDEX()] = findViewById(rid.getField(BUTTON_COMMAND_XML_PREFIX + command.toString()).getInt(rid));
+                commandButtons[command.INDEX()].setMinClickTimeInterval(BUTTON_MIN_CLICK_TIME_INTERVAL_MS);
                 final COMMANDS fcommand = command;
-                buttons[command.INDEX()].setOnClickListener(new View.OnClickListener() {
+                commandButtons[command.INDEX()].setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        onButtonClick(fcommand);
+                        onCommandButtonClick(fcommand);
                     }
                 });
             } catch (IllegalAccessException ex) {
@@ -438,46 +483,27 @@ public class MainActivity extends Activity {
             }
     }
 
-    private void setupGridButtons() {
-        final String BUTTON_GRID_XML_PREFIX = "BTN_P";
-        final long BUTTON_MIN_CLICK_TIME_INTERVAL_MS = 500;
-
-        gridButtons = new CustomButton[GRID_SIZE];
-        Class rid = R.id.class;
+    private void setupCellButtonColors() {
         for (int i = 0; i <= (GRID_SIZE - 1); i = i + 1) {
-            try {
-                gridButtons[i] = findViewById(rid.getField(BUTTON_GRID_XML_PREFIX + (i + 1)).getInt(rid));  // BTN_P1, BTN_P2, ...
-                gridButtons[i].setMinClickTimeInterval(BUTTON_MIN_CLICK_TIME_INTERVAL_MS);
-                final int index = i;
-                gridButtons[i].setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        onGridButtonClick(index);
-                    }
-                });
-            } catch (IllegalAccessException ex) {
-                Logger.getLogger(MainActivity.class.getName()).log(Level.SEVERE, null, ex);
-            } catch (IllegalArgumentException ex) {
-                Logger.getLogger(MainActivity.class.getName()).log(Level.SEVERE, null, ex);
-            } catch (NoSuchFieldException ex) {
-                Logger.getLogger(MainActivity.class.getName()).log(Level.SEVERE, null, ex);
-            } catch (SecurityException ex) {
-                Logger.getLogger(MainActivity.class.getName()).log(Level.SEVERE, null, ex);
-            }
+            cellButtons[i].setUnpressedColor(BUTTON_STATES.UNPRESSED.DEFAULT_COLOR());
+            cellButtons[i].setPressedColor(BUTTON_STATES.PRESSED.DEFAULT_COLOR());
         }
     }
 
-    private void setupButtonColors() {
+    private void setupKeyboardButtonColors() {
+        final String DELETE_DIGIT_KEYBOARD_BUTTON_TEXT_COLOR = "FF0000";   //  Rouge
+
+        for (int i = 0; i <= (GRID_ROWS); i = i + 1) {   //  10 boutons
+            keyboardButtons[i].setUnpressedColor(BUTTON_STATES.UNPRESSED.DEFAULT_COLOR());
+            keyboardButtons[i].setPressedColor(BUTTON_STATES.PRESSED.DEFAULT_COLOR());
+        }
+        keyboardButtons[DELETE_DIGIT_KEYBOARD_BUTTON_INDEX].setTextColor(Color.parseColor(COLOR_PREFIX + DELETE_DIGIT_KEYBOARD_BUTTON_TEXT_COLOR));
+    }
+
+    private void setupCommandButtonColors() {
         for (final COMMANDS command : COMMANDS.values()) {
-            buttons[command.INDEX()].setUnpressedColor(BUTTON_STATES.UNPRESSED.DEFAULT_COLOR());
-            buttons[command.INDEX()].setPressedColor((BUTTON_STATES.PRESSED.DEFAULT_COLOR()));
-        }
-    }
-
-    private void setupGridButtonColors() {
-        for (int i = 0; i <= (GRID_SIZE - 1); i = i + 1) {
-            gridButtons[i].setUnpressedColor(BUTTON_STATES.UNPRESSED.DEFAULT_COLOR());
-            gridButtons[i].setPressedColor(BUTTON_STATES.PRESSED.DEFAULT_COLOR());
+            commandButtons[command.INDEX()].setUnpressedColor(BUTTON_STATES.UNPRESSED.DEFAULT_COLOR());
+            commandButtons[command.INDEX()].setPressedColor((BUTTON_STATES.PRESSED.DEFAULT_COLOR()));
         }
     }
 
@@ -501,10 +527,6 @@ public class MainActivity extends Activity {
     private void setupStringShelfDatabase() {
         stringShelfDatabase = new StringShelfDatabase(this);
         stringShelfDatabase.open();
-        if (!tableActivityInfosExists(stringShelfDatabase)) {
-            createTableActivityInfosIfNotExists(stringShelfDatabase);
-            setStartStatusInMainActivity(stringShelfDatabase, ACTIVITY_START_STATUS.COLD);
-        }
         if (!tableCellsExists(stringShelfDatabase)) {
             createTableCellsIfNotExists(stringShelfDatabase);
             initializeTableCells(stringShelfDatabase, GRID_SIZE);
@@ -516,19 +538,6 @@ public class MainActivity extends Activity {
         callingIntent.putExtra(ACTIVITY_EXTRA_KEYS.TITLE.toString(), HELP_ACTIVITY_TITLE);
         callingIntent.putExtra(HELP_ACTIVITY_EXTRA_KEYS.HTML_ID.toString(), R.raw.helpmainactivity);
         startActivity(callingIntent);
-    }
-
-    private void launchInputButtonsActivity() {
-        setStartStatusInInputButtonsActivity(stringShelfDatabase, ACTIVITY_START_STATUS.COLD);
-        Intent callingIntent = new Intent(this, InputButtonsActivity.class);
-        callingIntent.putExtra(TABLE_EXTRA_KEYS.TABLE.toString(), getCellsTableName());
-        callingIntent.putExtra(TABLE_EXTRA_KEYS.INDEX.toString(), getCellValueIndex());
-        callingIntent.putExtra(ACTIVITY_EXTRA_KEYS.TITLE.toString(), "Cell value");
-        startActivityForResult(callingIntent, PEKISLIB_ACTIVITIES.INPUT_BUTTONS.INDEX());
-    }
-
-    private boolean returnsFromInputButtonsActivity() {
-        return (calledActivity.equals(PEKISLIB_ACTIVITIES.INPUT_BUTTONS.toString()));
     }
 
 }

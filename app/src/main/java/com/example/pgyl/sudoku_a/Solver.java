@@ -75,14 +75,14 @@ public class Solver {
     public void solve() {
         boolean cellUnique;
         boolean digitOverflow;
-        boolean pointerOverflow;
+        boolean pointerUnderflow;
 
         if (!solveState.equals(SOLVE_STATES.IMPOSSIBLE)) {
             solveState = SOLVE_STATES.UNKNOWN;
             int lastUnprotectedCellIndex = cellsHandler.getLastUnprotectedCellIndex();
             int firstUnprotectedCellIndex = cellsHandler.getFirstUnprotectedCellIndex();
             do {
-                pointerOverflow = false;
+                pointerUnderflow = false;
                 Cell currentCell = cells[pointer];
                 if (!currentCell.isEmpty()) {
                     freeDigitBox(currentCell);
@@ -108,7 +108,7 @@ public class Solver {
                     if (pointer != lastUnprotectedCellIndex) {
                         pointer = currentCell.nextUnprotectedCellIndex;
                     } else {
-                        pointerOverflow = true;
+                        pointerUnderflow = true;
                     }
                 } else {
                     currentCell.empty();
@@ -118,8 +118,8 @@ public class Solver {
                         solveState = SOLVE_STATES.IMPOSSIBLE;
                     }
                 }
-            } while ((!pointerOverflow) && (!solveState.equals(SOLVE_STATES.IMPOSSIBLE)));
-            if (pointerOverflow) {
+            } while ((!pointerUnderflow) && (!solveState.equals(SOLVE_STATES.IMPOSSIBLE)));
+            if (pointerUnderflow) {
                 pointer = lastUnprotectedCellIndex;
                 solveState = SOLVE_STATES.SOLUTION_FOUND;
             }

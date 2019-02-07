@@ -1,23 +1,19 @@
 <h2 style="color: #2e6c80;">Sudoku</h2>
-<p>The cells modified by the user are protected from the solver (orange color).<br />
-However, a distinct protection can be provided by pressing the "> PROTECT Distinct" button.<br />
-The color of the protected cells will then change from orange to blue.<br />
+<p>To enter a digit in a cell:<br />
+	<ol>
+		<li>Touch the cell (becomes red)</li>
+		<li>Touch the digit in the bottom row</li>
+	</ol>
+To delete a cell, press the "X" button instead of a digit.<br />
 <br />
-To modify a cell, press its button:<br />
-<ul>
-	<li>In case of blank input, the cell is deleted</li>
-	<li>After input:</li>
+After input:
 	<ul>
-		<li>The edited cell is protected from the solver</li>
+		<li>The edited cell is protected from the solver (becomes orange)</li>
 		<li>The non protected cells are deleted</li>
 		<li>The solver is reset</li>
 	</ul>
 </ul>
 To <strong>solve</strong> the sudoku, press the "SOLVE" button.<br />
-<ul>
-	<li>The "SOLVE" button becomes green if a solution is found, or red if impossible to solve</li>
-	<li>Press it again to display the next solution</li>
-</ul>
 </p>
 <table>
     <thead>
@@ -33,7 +29,7 @@ To <strong>solve</strong> the sudoku, press the "SOLVE" button.<br />
         </tr>
     </thead>
     <tbody>
-        <tr>
+	<tr>
             <td
                     align="center"
                     style="border: 1px solid black;">
@@ -46,6 +42,38 @@ To <strong>solve</strong> the sudoku, press the "SOLVE" button.<br />
 												(ON/OFF) (highlighted if ON)
             </td>
         </tr>
+	<tr>
+            <td
+                align="center"
+                style="border: 1px solid black;">
+                Reset
+            </td>
+            <td style="border: 1px solid black;">
+				Delete all cells (Unprotected and Protected)
+            </td>
+        </tr>
+	<tr>
+            <td
+                align="center"
+                style="border: 1px solid black;">
+                Reset U
+            </td>
+            <td style="border: 1px solid black;">
+				Delete all Unprotected cells
+            </td>
+        </tr>		
+		<tr>
+            <td
+                align="center"
+                style="border: 1px solid black;">
+                Solve
+            </td>
+            <td style="border: 1px solid black;">
+			Solve the sudoku<br />
+				Beecomes green if a solution is found, or red if impossible to solve.<br />
+				Press it again to display the next solution.
+            </td>
+        </tr>	
     </tbody>
 </table>
 <p>A menu is also available:</p>
@@ -63,30 +91,6 @@ To <strong>solve</strong> the sudoku, press the "SOLVE" button.<br />
         </tr>
     </thead>
     <tbody>
-	<tr>
-            <td
-                    align="center"
-                    style="border: 1px solid black;">Delete all except Protected
-            </td>
-            <td style="border: 1px solid black;">Delete all cells except the protected ones
-            </td>
-        </tr>
-		<tr>
-            <td
-                    align="center"
-                    style="border: 1px solid black;">Delete all except Distinct
-            </td>
-            <td style="border: 1px solid black;">Delete all cells except the distinctly protected ones
-            </td>
-        </tr>
-		<tr>
-            <td
-                    align="center"
-                    style="border: 1px solid black;">Delete all
-            </td>
-            <td style="border: 1px solid black;">Delete all cells
-            </td>
-        </tr>
         <tr>
             <td
                     align="center"

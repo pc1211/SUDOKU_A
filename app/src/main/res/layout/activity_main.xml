@@ -8,8 +8,8 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="3"
         android:layout_marginTop="4dp"
+        android:layout_weight="3"
         android:orientation="horizontal">
 
         <LinearLayout
@@ -854,24 +854,112 @@
             </LinearLayout>
         </LinearLayout>
     </LinearLayout>
+
     <LinearLayout
-        android:orientation="horizontal"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_marginTop="4dp"
-        android:layout_weight="1">
+        android:layout_weight="1"
+        android:orientation="horizontal">
+
         <com.example.pgyl.pekislib_a.CustomButton
-            android:id="@+id/BTN_PROTECTED_DISTINCT"
-            android:text="> PROTECT Distinct"
+            android:id="@+id/BTN_K1"
             android:layout_width="0dp"
+            android:layout_height="match_parent"
             android:layout_weight="1"
-            android:layout_height="match_parent" />
+            android:text="K1" />
+
+        <com.example.pgyl.pekislib_a.CustomButton
+            android:id="@+id/BTN_K2"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:text="K2" />
+
+        <com.example.pgyl.pekislib_a.CustomButton
+            android:id="@+id/BTN_K3"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:text="K3" />
+
+        <com.example.pgyl.pekislib_a.CustomButton
+            android:id="@+id/BTN_K4"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:text="K4" />
+
+        <com.example.pgyl.pekislib_a.CustomButton
+            android:id="@+id/BTN_K5"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:text="K5" />
+
+        <com.example.pgyl.pekislib_a.CustomButton
+            android:id="@+id/BTN_K6"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:text="K6" />
+
+        <com.example.pgyl.pekislib_a.CustomButton
+            android:id="@+id/BTN_K7"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:text="K7" />
+
+        <com.example.pgyl.pekislib_a.CustomButton
+            android:id="@+id/BTN_K8"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:text="K8" />
+
+        <com.example.pgyl.pekislib_a.CustomButton
+            android:id="@+id/BTN_K9"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:text="K9" />
+
+        <com.example.pgyl.pekislib_a.CustomButton
+            android:id="@+id/BTN_K10"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:text="K10" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginTop="4dp"
+        android:layout_weight="1"
+        android:orientation="horizontal">
+
+        <com.example.pgyl.pekislib_a.CustomButton
+            android:id="@+id/BTN_RESET"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:text="RESET" />
+
+        <com.example.pgyl.pekislib_a.CustomButton
+            android:id="@+id/BTN_RESET_U"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:text="RESET U" />
+
         <com.example.pgyl.pekislib_a.CustomButton
             android:id="@+id/BTN_SOLVE"
-            android:text="SOLVE"
-            android:textStyle="bold"
             android:layout_width="0dp"
+            android:layout_height="match_parent"
             android:layout_weight="1"
-            android:layout_height="match_parent" />
+            android:text="SOLVE"
+            android:textStyle="bold" />
     </LinearLayout>
 </LinearLayout>

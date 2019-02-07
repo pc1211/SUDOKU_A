@@ -2,13 +2,9 @@ package com.example.pgyl.sudoku_a;
 
 import com.example.pgyl.pekislib_a.InputButtonsActivity.KEYBOARDS;
 import com.example.pgyl.pekislib_a.StringShelfDatabase;
-import com.example.pgyl.pekislib_a.StringShelfDatabaseUtils.ACTIVITY_START_STATUS;
 import com.example.pgyl.pekislib_a.StringShelfDatabaseUtils.TABLE_IDS;
-import com.example.pgyl.sudoku_a.Constants.SUDOKU_ACTIVITIES;
 
 import static com.example.pgyl.pekislib_a.StringShelfDatabase.TABLE_ID_INDEX;
-import static com.example.pgyl.pekislib_a.StringShelfDatabaseUtils.getActivityInfosStartStatusIndex;
-import static com.example.pgyl.pekislib_a.StringShelfDatabaseUtils.getActivityInfosTableName;
 
 public class StringShelfDatabaseUtils {
     //region Constantes
@@ -110,16 +106,6 @@ public class StringShelfDatabaseUtils {
             }
         }
         return ret;
-    }
-    //endregion
-
-    //region START_STATUS
-    public static boolean isColdStartStatusInMainActivity(StringShelfDatabase stringShelfDatabase) {
-        return stringShelfDatabase.selectFieldByIdOrCreate(getActivityInfosTableName(), SUDOKU_ACTIVITIES.MAIN.toString(), getActivityInfosStartStatusIndex()).equals(ACTIVITY_START_STATUS.COLD.toString());
-    }
-
-    public static void setStartStatusInMainActivity(StringShelfDatabase stringShelfDatabase, ACTIVITY_START_STATUS activityStartStatus) {
-        stringShelfDatabase.insertOrReplaceFieldById(getActivityInfosTableName(), SUDOKU_ACTIVITIES.MAIN.toString(), getActivityInfosStartStatusIndex(), activityStartStatus.toString());
     }
     //endregion
 
