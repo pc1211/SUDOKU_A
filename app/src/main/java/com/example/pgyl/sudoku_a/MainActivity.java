@@ -492,13 +492,14 @@ public class MainActivity extends Activity {
 
     private void setupKeyboardButtonColors() {
         final String DELETE_DIGIT_KEYBOARD_BUTTON_TEXT_COLOR = "FF0000";   //  Rouge
+        final String NORMAL_DIGIT_KEYBOARD_BUTTON_TEXT_COLOR = "0000FF";   //  Bleu
 
         for (int i = 0; i <= (GRID_ROWS); i = i + 1) {   //  10 boutons
+            keyboardButtons[i].setTextColor(Color.parseColor(COLOR_PREFIX + ((i == DELETE_DIGIT_KEYBOARD_BUTTON_INDEX) ? DELETE_DIGIT_KEYBOARD_BUTTON_TEXT_COLOR : NORMAL_DIGIT_KEYBOARD_BUTTON_TEXT_COLOR)));
             keyboardButtons[i].setTypeface(keyboardButtons[i].getTypeface(), Typeface.BOLD);
             keyboardButtons[i].setUnpressedColor(BUTTON_STATES.UNPRESSED.DEFAULT_COLOR());
             keyboardButtons[i].setPressedColor(BUTTON_STATES.PRESSED.DEFAULT_COLOR());
         }
-        keyboardButtons[DELETE_DIGIT_KEYBOARD_BUTTON_INDEX].setTextColor(Color.parseColor(COLOR_PREFIX + DELETE_DIGIT_KEYBOARD_BUTTON_TEXT_COLOR));
     }
 
     private void setupCommandButtonColors() {
