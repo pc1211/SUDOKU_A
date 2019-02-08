@@ -184,10 +184,10 @@ public class MainActivity extends Activity {
     private void onKeyboardButtonClick(String input) {
         if (editPointer != NO_EDIT_POINTER) {
             handleCellInput(input);
-            updateDisplayCellButtonText(editPointer);
             int oldEditPointer = editPointer;
             editPointer = NO_EDIT_POINTER;
-            updateDisplayCellButtonColor(oldEditPointer);     //  Cellule Rouge -> Normal
+            updateDisplayCellButtonColor(oldEditPointer);
+            updateDisplayCellButtonTexts();
         }
     }
 
