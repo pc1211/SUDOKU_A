@@ -188,6 +188,7 @@ public class MainActivity extends Activity {
             editPointer = NO_EDIT_POINTER;
             updateDisplayCellButtonColor(oldEditPointer);
             updateDisplayCellButtonTexts();
+            updateDisplayCommandButtonColors();
         }
     }
 

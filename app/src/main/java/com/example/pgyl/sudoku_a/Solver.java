@@ -75,57 +75,47 @@ public class Solver {
     public void solve() {
         boolean cellUnique;
         boolean digitOverflow;
-        boolean pointerUnderflow;
 
-        if (!solveState.equals(SOLVE_STATES.IMPOSSIBLE)) {
-            solveState = SOLVE_STATES.UNKNOWN;
-            int lastUnprotectedCellIndex = cellsHandler.getLastUnprotectedCellIndex();
-            int firstUnprotectedCellIndex = cellsHandler.getFirstUnprotectedCellIndex();
+        solveState = SOLVE_STATES.UNKNOWN;
+        int lastUnprotectedCellIndex = cellsHandler.getLastUnprotectedCellIndex();
+        int firstUnprotectedCellIndex = cellsHandler.getFirstUnprotectedCellIndex();
+        do {
+            Cell currentCell = cells[pointer];
+            if (!currentCell.isEmpty()) {
+                freeDigitBox(currentCell);
+            }
             do {
-                pointerUnderflow = false;
-                Cell currentCell = cells[pointer];
-                if (!currentCell.isEmpty()) {
-                    freeDigitBox(currentCell);
-                }
-                do {
-                    cellUnique = false;
-                    digitOverflow = false;
-                    currentCell.value = currentCell.value + 1;
-                    if (currentCell.value <= gridRows) {
-                        if (isCellUniqueInRow(currentCell)) {
-                            if (isCellUniqueInColumn(currentCell)) {
-                                if (isCellUniqueInSquare(currentCell)) {
-                                    cellUnique = true;
-                                }
+                cellUnique = false;
+                digitOverflow = false;
+                currentCell.value = currentCell.value + 1;
+                if (currentCell.value <= gridRows) {
+                    if (isCellUniqueInRow(currentCell)) {
+                        if (isCellUniqueInColumn(currentCell)) {
+                            if (isCellUniqueInSquare(currentCell)) {
+                                cellUnique = true;
                             }
                         }
-                    } else {
-                        digitOverflow = true;
-                    }
-                } while ((!cellUnique) && (!digitOverflow));
-                if (cellUnique) {
-                    bookDigitBox(currentCell);
-                    if (pointer != lastUnprotectedCellIndex) {
-                        pointer = currentCell.nextUnprotectedCellIndex;
-                    } else {
-                        pointerUnderflow = true;
                     }
                 } else {
-                    currentCell.empty();
-                    if (pointer != firstUnprotectedCellIndex) {
-                        pointer = currentCell.previousUnprotectedCellIndex;
-                    } else {
-                        solveState = SOLVE_STATES.IMPOSSIBLE;
-                    }
+                    digitOverflow = true;
                 }
-            } while ((!pointerUnderflow) && (!solveState.equals(SOLVE_STATES.IMPOSSIBLE)));
-            if (pointerUnderflow) {
-                pointer = lastUnprotectedCellIndex;
-                solveState = SOLVE_STATES.SOLUTION_FOUND;
+            } while ((!cellUnique) && (!digitOverflow));
+            if (cellUnique) {
+                bookDigitBox(currentCell);
+                if (pointer != lastUnprotectedCellIndex) {
+                    pointer = currentCell.nextUnprotectedCellIndex;
+                } else {
+                    solveState = SOLVE_STATES.SOLUTION_FOUND;
+                }
+            } else {
+                currentCell.empty();
+                if (pointer != firstUnprotectedCellIndex) {
+                    pointer = currentCell.previousUnprotectedCellIndex;
+                } else {
+                    solveState = SOLVE_STATES.IMPOSSIBLE;
+                }
             }
-        } else {
-            solveState = SOLVE_STATES.UNKNOWN;
-        }
+        } while (solveState.equals(SOLVE_STATES.UNKNOWN));
         if (mOnSolveEndListener != null) {
             mOnSolveEndListener.onSolveEnd();
         }

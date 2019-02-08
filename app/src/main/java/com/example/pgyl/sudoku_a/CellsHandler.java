@@ -86,9 +86,9 @@ public class CellsHandler {
 
     private void prepareCellsForSolver() {
         for (int i = 0; i <= (gridSize - 1); i = i + 1) {
-            cells[i].rowDigitBoxIndex = i / gridRows;   //  (n° de ligne (0..8)) dans la grille
-            cells[i].colDigitBoxIndex = (i % gridRows) + gridRows;     //  (9 + n° de colonne (0..8)) dans la grille
-            cells[i].squareDigitBoxIndex = squareRows * ((i / gridRows) / squareRows) + ((i % gridRows) / squareRows) + 2 * gridRows;   //  (18 + n° de carré (0..8)) dans la grille
+            cells[i].rowDigitBoxIndex = i / gridRows;   //  n° de ligne (0..8) dans la grille
+            cells[i].colDigitBoxIndex = (i % gridRows) + gridRows;     //  9 + (n° de colonne (0..8) dans la grille)
+            cells[i].squareDigitBoxIndex = squareRows * ((i / gridRows) / squareRows) + ((i % gridRows) / squareRows) + 2 * gridRows;   //  18 + (n° de carré (0..8) dans la grille)
         }
     }
 
