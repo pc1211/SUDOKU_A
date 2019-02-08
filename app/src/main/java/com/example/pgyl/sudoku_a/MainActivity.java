@@ -7,6 +7,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -167,18 +168,17 @@ public class MainActivity extends Activity {
 
     private void onCellButtonClick(int index) {
         if (editPointer != NO_EDIT_POINTER) {
-            if (editPointer != index) {
-                updateDisplayCellButtonColor(editPointer);    //  Ancienne cellule Rouge -> Normal
+            if (index != editPointer) {
+                int oldEditPointer = editPointer;
                 editPointer = index;
-                updateDisplayCellButtonColor(editPointer);    //  Nouvelle cellule Normal-> Rouge
+                updateDisplayCellButtonColor(oldEditPointer);
             } else {
                 editPointer = NO_EDIT_POINTER;
-                updateDisplayCellButtonColor(index);          //  Même cellule Rouge -> Normal
             }
         } else {
             editPointer = index;
-            updateDisplayCellButtonColor(editPointer);        //  Cellule Normal -> Rouge
         }
+        updateDisplayCellButtonColor(index);
     }
 
     private void onKeyboardButtonClick(String input) {
@@ -308,7 +308,7 @@ public class MainActivity extends Activity {
         final String ENABLE_EDIT_UNPRESSED_COLOR = "FF0000";       //  Rouge
         final String ENABLE_EDIT_PRESSED_COLOR = "940000";
 
-        if (editPointer == index) {
+        if (index == editPointer) {
             cellButtons[index].setUnpressedColor(ENABLE_EDIT_UNPRESSED_COLOR);
             cellButtons[index].setPressedColor(ENABLE_EDIT_PRESSED_COLOR);
         } else {
@@ -498,6 +498,7 @@ public class MainActivity extends Activity {
             keyboardButtons[i].setPressedColor(BUTTON_STATES.PRESSED.DEFAULT_COLOR());
         }
         keyboardButtons[DELETE_DIGIT_KEYBOARD_BUTTON_INDEX].setTextColor(Color.parseColor(COLOR_PREFIX + DELETE_DIGIT_KEYBOARD_BUTTON_TEXT_COLOR));
+        keyboardButtons[DELETE_DIGIT_KEYBOARD_BUTTON_INDEX].setTypeface(keyboardButtons[DELETE_DIGIT_KEYBOARD_BUTTON_INDEX].getTypeface(), Typeface.BOLD);
     }
 
     private void setupCommandButtonColors() {
