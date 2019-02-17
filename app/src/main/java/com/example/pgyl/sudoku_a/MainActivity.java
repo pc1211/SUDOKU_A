@@ -64,14 +64,14 @@ public class MainActivity extends Activity {
     private Cell[] cells;
     private Solver solver;
     private CellsHandler cellsHandler;
+    private SatsNodesHandler satsNodesHandler;
     private Menu menu;
     private MenuItem barMenuItemKeepScreen;
     private StringShelfDatabase stringShelfDatabase;
     private String shpFileName;
     private boolean keepScreen;
-    private SOLVE_STATES solveState;
-    private int pointer;
     private int editPointer;
+    private boolean needSolverReset;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -95,11 +95,11 @@ public class MainActivity extends Activity {
         stringShelfDatabase.close();
         stringShelfDatabase = null;
         menu = null;
-        pointer = solver.getPointer();
-        solveState = solver.getSolveState();
         savePreferences();
         solver.close();
         solver = null;
+        satsNodesHandler.close();
+        satsNodesHandler = null;
         cellsHandler.close();
         cellsHandler = null;
         cells = null;
@@ -115,16 +115,14 @@ public class MainActivity extends Activity {
         setupStringShelfDatabase();
         cells = cellRowsToCells(StringShelfDatabaseUtils.getCells(stringShelfDatabase));
         setupCellsHandler();
+        setupSatsNodesHandler();
         setupSolver();
         setupCellButtonColors();
         setupKeyboardButtonColors();
         setupCommandButtonColors();
 
-        solveState = getSHPSolveState();
-        pointer = getSHPPointer();
         editPointer = getSHPEditPointer();
-        solver.setPointer(pointer);
-        solver.setSolveState(solveState);
+        needSolverReset = true;
 
         updateDisplayCellButtonTexts();
         updateDisplayCellButtonColors();
@@ -209,8 +207,7 @@ public class MainActivity extends Activity {
                     if (cmd.equals(COMMANDS.RESET_U)) {
                         cellsHandler.deleteAllExceptProtectedCells();
                     }
-                    cellsHandler.linkCells();
-                    solver.reset();
+                    needSolverReset = true;
                 }
             });
             builder.setNegativeButton("No", null);
@@ -226,6 +223,9 @@ public class MainActivity extends Activity {
             dialog.show();
         }
         if (command.equals(COMMANDS.SOLVE)) {
+            if (needSolverReset) {
+                solver.reset();
+            }
             solver.solve();
         }
     }
@@ -236,38 +236,33 @@ public class MainActivity extends Activity {
     }
 
     private void handleCellInput(String input) {
-        Cell editCell = cells[editPointer];
-        editCell.empty();
         cellsHandler.deleteAllExceptProtectedCells();
-        cellsHandler.linkCells();
-        solver.reset();
+        needSolverReset = true;
         if (!input.equals(DELETE_DIGIT_KEYBOARD_BUTTON_VALUE)) {
-            editCell.value = Integer.parseInt(input);
-            String errorMsg = reportUniqueCellValue(editCell);
-            if (errorMsg.equals("")) {     //  cas pas de remarques
-                editCell.protect();
+            int value = Integer.parseInt(input);
+            String errorMsg = reportUniqueCellValue(editPointer, value);
+            if (errorMsg.equals("")) {     //  cad pas de remarques
+                cells[editPointer].value = value;
+                cells[editPointer].protect();
             } else {
                 msgBox(errorMsg, this);
-                editCell.empty();
             }
-            cellsHandler.linkCells();
-            solver.reset();
         }
     }
 
-    private String reportUniqueCellValue(Cell cell) {
+    private String reportUniqueCellValue(int cellIndex, int cellValue) {
         String ret = "";
-        if (!solver.isCellUniqueInRow(cell)) {
+        if (!cellsHandler.isValueUniqueInCellRow(cellIndex, cellValue)) {
             ret = ret + ((!ret.equals("")) ? " and " : "") + "row";
         }
-        if (!solver.isCellUniqueInColumn(cell)) {
+        if (!cellsHandler.isValueUniqueInCellCol(cellIndex, cellValue)) {
             ret = ret + ((!ret.equals("")) ? " and " : "") + "column";
         }
-        if (!solver.isCellUniqueInSquare(cell)) {
+        if (!cellsHandler.isValueUniqueInCellSquare(cellIndex, cellValue)) {
             ret = ret + ((!ret.equals("")) ? " and " : "") + "square";
         }
         if (!ret.equals("")) {
-            ret = "There is already a " + String.valueOf(cell.value) + " in the same " + ret;
+            ret = "There is already a " + String.valueOf(cellValue) + " in the same " + ret;
         }
         return ret;
     }
@@ -353,21 +348,9 @@ public class MainActivity extends Activity {
     private void savePreferences() {
         SharedPreferences shp = getSharedPreferences(shpFileName, MODE_PRIVATE);
         SharedPreferences.Editor shpEditor = shp.edit();
-        shpEditor.putString(SUDOKU_SHP_KEY_NAMES.SOLVE_STATE.toString(), solveState.toString());
-        shpEditor.putInt(SUDOKU_SHP_KEY_NAMES.POINTER.toString(), pointer);
         shpEditor.putInt(SUDOKU_SHP_KEY_NAMES.EDIT_POINTER.toString(), editPointer);
         shpEditor.putBoolean(SUDOKU_SHP_KEY_NAMES.KEEP_SCREEN.toString(), keepScreen);
         shpEditor.commit();
-    }
-
-    private SOLVE_STATES getSHPSolveState() {
-        SharedPreferences shp = getSharedPreferences(shpFileName, MODE_PRIVATE);
-        return SOLVE_STATES.valueOf(shp.getString(SUDOKU_SHP_KEY_NAMES.SOLVE_STATE.toString(), SOLVE_STATES.UNKNOWN.toString()));
-    }
-
-    private int getSHPPointer() {
-        SharedPreferences shp = getSharedPreferences(shpFileName, MODE_PRIVATE);
-        return shp.getInt(SUDOKU_SHP_KEY_NAMES.POINTER.toString(), 0);
     }
 
     private int getSHPEditPointer() {
@@ -386,8 +369,12 @@ public class MainActivity extends Activity {
         cellsHandler = new CellsHandler(cells);
     }
 
+    private void setupSatsNodesHandler() {
+        satsNodesHandler = new SatsNodesHandler(cellsHandler);
+    }
+
     private void setupSolver() {
-        solver = new Solver(cellsHandler);
+        solver = new Solver(satsNodesHandler);
         solver.setOnSolveEndListener(new Solver.onSolveEndListener() {
             @Override
             public void onSolveEnd() {

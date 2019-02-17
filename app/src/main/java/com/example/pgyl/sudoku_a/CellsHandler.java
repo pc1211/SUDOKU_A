@@ -6,8 +6,6 @@ public class CellsHandler {
     private int gridSize;
     private int gridRows;
     private int squareRows;
-    private int firstUnprotectedCellIndex;
-    private int lastUnprotectedCellIndex;
     //endregion
 
     public CellsHandler(Cell[] cells) {
@@ -19,8 +17,6 @@ public class CellsHandler {
         gridSize = cells.length;
         gridRows = (int) Math.sqrt(gridSize);
         squareRows = (int) Math.sqrt(gridRows);
-        prepareCellsForSolver();
-        linkCells();
     }
 
     public void close() {
@@ -31,12 +27,16 @@ public class CellsHandler {
         return cells;
     }
 
-    public int getFirstUnprotectedCellIndex() {
-        return firstUnprotectedCellIndex;
+    public int getGridSize() {
+        return gridSize;
     }
 
-    public int getLastUnprotectedCellIndex() {
-        return lastUnprotectedCellIndex;
+    public int getGridRows() {
+        return gridRows;
+    }
+
+    public int getSquareRows() {
+        return squareRows;
     }
 
     public void deleteAllExceptProtectedCells() {
@@ -53,43 +53,42 @@ public class CellsHandler {
         }
     }
 
-    public void linkCells() {
-        boolean isProtected;
-
-        int lastCellIndex = -1;
-        firstUnprotectedCellIndex = -1;
-        lastUnprotectedCellIndex = -1;
-        int i = 0;
-        do {
-            do {
-                isProtected = cells[i].isProtected();
-                if (isProtected) {
-                    i = i + 1;
-                }
+    public boolean isValueUniqueInCellRow(int cellIndex, int cellValue) {
+        int row = cellIndex / gridRows;
+        for (int i = 0; i <= (gridRows - 1); i = i + 1) {   //  i = n° de colonne dans la grille
+            int cind = gridRows * row + i;
+            if (cells[cind].value == cellValue) {
+                return false;
             }
-            while ((i < gridSize) & (isProtected));
-            if (i < gridSize) {
-                if (lastCellIndex != -1) {
-                    cells[lastCellIndex].nextUnprotectedCellIndex = i;
-                    cells[i].previousUnprotectedCellIndex = lastCellIndex;
-                } else {
-                    firstUnprotectedCellIndex = i;
-                }
-                lastCellIndex = i;
-                i = i + 1;
-            }
-        } while (i < gridSize);
-        if (lastCellIndex != -1) {
-            lastUnprotectedCellIndex = lastCellIndex;
         }
+        return true;
     }
 
-    private void prepareCellsForSolver() {
-        for (int i = 0; i <= (gridSize - 1); i = i + 1) {
-            cells[i].rowDigitBoxIndex = i / gridRows;   //  n° de ligne (0..8) dans la grille
-            cells[i].colDigitBoxIndex = (i % gridRows) + gridRows;     //  9 + (n° de colonne (0..8) dans la grille)
-            cells[i].squareDigitBoxIndex = squareRows * ((i / gridRows) / squareRows) + ((i % gridRows) / squareRows) + 2 * gridRows;   //  18 + (n° de carré (0..8) dans la grille)
+    public boolean isValueUniqueInCellCol(int cellIndex, int cellValue) {
+        int col = cellIndex % gridRows;
+        for (int i = 0; i <= (gridRows - 1); i = i + 1) {    //  i = n° de ligne dans la grille
+            int cind = i * gridRows + col;
+            if (cells[cind].value == cellValue) {
+                return false;
+            }
         }
+        return true;
+    }
+
+    public boolean isValueUniqueInCellSquare(int cellIndex, int cellValue) {
+        int row = cellIndex / gridRows;
+        int col = cellIndex % gridRows;
+        int squareFirstRow = (row / squareRows) * squareRows;      //  n° de la 1e ligne du carré dans la grille
+        int squareFirstCol = (col / squareRows) * squareRows;      //  n° de la 1e colonne du carré dans la grille
+        for (int i = 0; i <= (squareRows - 1); i = i + 1) {        //  i = n° de ligne dans le carré
+            for (int j = 0; j <= (squareRows - 1); j = j + 1) {    //  j = n° de colonne dans le carré
+                int cind = (squareFirstRow + i) * 9 + (squareFirstCol + j);
+                if (cells[cind].value == cellValue) {
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 
 }

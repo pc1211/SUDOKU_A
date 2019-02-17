@@ -17,11 +17,6 @@ public class Cell {
     public int pointer;
     public int value;
     private int status;
-    public int rowDigitBoxIndex;
-    public int colDigitBoxIndex;
-    public int squareDigitBoxIndex;
-    public int nextUnprotectedCellIndex;
-    public int previousUnprotectedCellIndex;
     //endregion
 
     public Cell(int pointer) {
@@ -38,13 +33,7 @@ public class Cell {
     }
 
     private void init() {
-        final int INDEX_DEFAULT_VALUE = 0;
-
-        rowDigitBoxIndex = INDEX_DEFAULT_VALUE;
-        colDigitBoxIndex = INDEX_DEFAULT_VALUE;
-        squareDigitBoxIndex = INDEX_DEFAULT_VALUE;
-        nextUnprotectedCellIndex = INDEX_DEFAULT_VALUE;
-        previousUnprotectedCellIndex = INDEX_DEFAULT_VALUE;
+        //   NOP;
     }
 
     public void empty() {
