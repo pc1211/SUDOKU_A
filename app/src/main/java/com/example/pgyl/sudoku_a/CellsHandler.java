@@ -53,7 +53,7 @@ public class CellsHandler {
         }
     }
 
-    public boolean isValueUniqueInCellRow(int cellIndex, int cellValue) {
+    public boolean isValueUniqueInRow(int cellIndex, int cellValue) {
         int row = cellIndex / gridRows;
         for (int i = 0; i <= (gridRows - 1); i = i + 1) {   //  i = n° de colonne dans la grille
             int cind = gridRows * row + i;
@@ -64,7 +64,7 @@ public class CellsHandler {
         return true;
     }
 
-    public boolean isValueUniqueInCellCol(int cellIndex, int cellValue) {
+    public boolean isValueUniqueInCol(int cellIndex, int cellValue) {
         int col = cellIndex % gridRows;
         for (int i = 0; i <= (gridRows - 1); i = i + 1) {    //  i = n° de ligne dans la grille
             int cind = i * gridRows + col;
@@ -75,14 +75,14 @@ public class CellsHandler {
         return true;
     }
 
-    public boolean isValueUniqueInCellSquare(int cellIndex, int cellValue) {
+    public boolean isValueUniqueInSquare(int cellIndex, int cellValue) {
         int row = cellIndex / gridRows;
         int col = cellIndex % gridRows;
         int squareFirstRow = (row / squareRows) * squareRows;      //  n° de la 1e ligne du carré dans la grille
         int squareFirstCol = (col / squareRows) * squareRows;      //  n° de la 1e colonne du carré dans la grille
         for (int i = 0; i <= (squareRows - 1); i = i + 1) {        //  i = n° de ligne dans le carré
             for (int j = 0; j <= (squareRows - 1); j = j + 1) {    //  j = n° de colonne dans le carré
-                int cind = (squareFirstRow + i) * 9 + (squareFirstCol + j);
+                int cind = (squareFirstRow + i) * gridRows + (squareFirstCol + j);
                 if (cells[cind].value == cellValue) {
                     return false;
                 }

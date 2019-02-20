@@ -11,7 +11,8 @@ public class SatsNodesHandler {
 
     //region Variables
     private ArrayList<SatsNode> nodes;
-    private ArrayList<SatsNode> nodeStack;
+    private ArrayList<SatsNode> candidateStack;
+    private ArrayList<Integer> solutionStack;
     private SatsNode rootHeader;
     private CellsHandler cellsHandler;
     private boolean[][] sats;
@@ -31,45 +32,54 @@ public class SatsNodesHandler {
         gridSize = cellsHandler.getGridSize();
         gridRows = cellsHandler.getGridRows();
         squareRows = cellsHandler.getSquareRows();
-        cells = cellsHandler.getCells();
-        nodeStack = new ArrayList<SatsNode>();
+        candidateStack = new ArrayList<SatsNode>();
+        solutionStack = new ArrayList<Integer>();
         nodes = new ArrayList<SatsNode>();
-        level = 0;
     }
 
     public void close() {
         cells = null;
         nodes.clear();
-        nodeStack.clear();
         nodes = null;
-        nodeStack = null;
+        candidateStack.clear();
+        candidateStack = null;
+        solutionStack.clear();
+        solutionStack = null;
     }
 
     public void reset() {
+        cells = cellsHandler.getCells();
+        cellsHandler.deleteAllExceptProtectedCells();
         nodes.clear();
-        nodeStack.clear();
-        createCanonicalSatsMatrix();
-        cellsToSatsMatrix();
+        candidateStack.clear();
+        solutionStack.clear();
+        createSatsMatrix();
+        mergeCellsIntoSatsMatrix();
         satsMatrixToSatsNodes();
         level = 0;
     }
 
-    public void setNextPathNodes(SatsNode colHeader) {
+    public void setNextCandidates(SatsNode colHeader) {
         level = level + 1;
         SatsNode nc = colHeader.down;
         while (!nc.equals(colHeader)) {
-            nc.level = level;
-            push(nc);
+            if (nc.rowHeader.level == FREE) {
+                nc.level = level;   //  On inscrit le niveau dans le noeud simple
+                pushCandidate(nc);
+            }
             nc = nc.down;
         }
     }
 
-    public SatsNode getNextPathNode() {
-        SatsNode ret = pop();
+    public SatsNode getNextCandidate() {
+        SatsNode ret = popCandidate();
         if (ret != null) {
-            if (ret.level < level) {
-                level = level - 1;
-                unCover();
+            if (ret.level < level) {     //  Le noeud simple date d'un niveau antérieur
+                discardLastSolution();    //  Enlever la fausse piste du niveau actuel
+                while (ret.level < level) {
+                    level = level - 1;
+                    unCover();
+                }
             }
             cover(ret);
         }
@@ -80,7 +90,7 @@ public class SatsNodesHandler {
         SatsNode ret = null;
         int min = Integer.MAX_VALUE;
         SatsNode ch = rootHeader.right;
-        do {
+        while (!ch.equals(rootHeader)) {
             if (ch.level == FREE) {
                 int rc = rowCount(ch);
                 if (rc < min) {
@@ -89,7 +99,7 @@ public class SatsNodesHandler {
                 }
             }
             ch = ch.right;
-        } while (!ch.equals(rootHeader));
+        }
         return ret;
     }
 
@@ -97,8 +107,7 @@ public class SatsNodesHandler {
         int ret = 0;
         SatsNode nc = colHeader.down;
         while (!nc.equals(colHeader)) {
-            SatsNode rh = nc.rowHeader;
-            if (rh.level == FREE) {
+            if (nc.rowHeader.level == FREE) {
                 ret = ret + 1;
             }
             nc = nc.down;
@@ -128,61 +137,47 @@ public class SatsNodesHandler {
 
     public void unCover() {
         SatsNode rh = rootHeader.down;
-        do {
+        while (!rh.equals(rootHeader)) {
             if (rh.level == level) {
                 rh.level = FREE;
             }
             rh = rh.down;
-        } while (!rh.equals(rootHeader));
+        }
         SatsNode ch = rootHeader.right;
-        do {
+        while (!ch.equals(rootHeader)) {
             if (ch.level == level) {
                 ch.level = FREE;
             }
             ch = ch.right;
-        } while (!ch.equals(rootHeader));
+        }
     }
 
-    public void push(SatsNode node) {
-        nodeStack.add(node);
+    public void pushCandidate(SatsNode node) {
+        candidateStack.add(node);
     }
 
-    public SatsNode pop() {
+    public SatsNode popCandidate() {
         SatsNode ret = null;
-        int size = nodeStack.size();
+        int size = candidateStack.size();
         if (size > 0) {
-            ret = nodeStack.get(size - 1);
-            nodeStack.remove(size - 1);
+            ret = candidateStack.get(size - 1);
+            candidateStack.remove(size - 1);
         }
         return ret;
     }
 
-    private void satsMatrixToSatsNodes() {
+    public void addSolution(SatsNode node) {
+        solutionStack.add(node.rowHeader.satsRow);
+    }
 
-        boolean[][] sats = new boolean[6][7];
-        for (int i = 0; i <= (sats.length - 1); i = i + 1) {
-            for (int j = 0; j <= (sats[0].length - 1); j = j + 1) {
-                sats[i][j] = false;
-            }
+    public void discardLastSolution() {
+        int size = solutionStack.size();
+        if (size > 0) {
+            solutionStack.remove(size - 1);
         }
-        sats[0][2] = true;
-        sats[0][4] = true;
-        sats[0][5] = true;
-        sats[1][0] = true;
-        sats[1][3] = true;
-        sats[1][6] = true;
-        sats[2][1] = true;
-        sats[2][2] = true;
-        sats[2][5] = true;
-        sats[3][0] = true;
-        sats[3][3] = true;
-        sats[4][1] = true;
-        sats[4][6] = true;
-        sats[5][3] = true;
-        sats[5][4] = true;
-        sats[5][6] = true;
+    }
 
-
+    private void satsMatrixToSatsNodes() {
         int candidates = sats.length;
         int constraints = sats[0].length;
 
@@ -204,7 +199,7 @@ public class SatsNodesHandler {
                     SatsNode node = new SatsNode();
                     nodes.add(node);                  //  Création noeud simple
                     if (rowHeader == null) {
-                        rowHeader = new SatsNode();   //  Le noeud simple était le 1er de sa ligne => Création Entête de ligne
+                        rowHeader = new SatsNode();   //  Le noeud simple est le 1er de sa ligne => Création Entête de ligne
                         nodes.add(rowHeader);
                         rowHeader.right = node;       //  L'entête de ligne pointe vers le 1er noeud simple de sa ligne
                         rowHeader.satsRow = i;
@@ -215,7 +210,7 @@ public class SatsNodesHandler {
                         lastColNode.right = node;     //  Le noeud simple précédent (de la même ligne) pointe vers celui-ci
                     }
                     if (colHeaders[j] == null) {
-                        colHeaders[j] = new SatsNode();    //  Le noeud simple était le 1er de sa colonne => Création Entête de colonne
+                        colHeaders[j] = new SatsNode();    //  Le noeud simple est le 1er de sa colonne => Création Entête de colonne
                         nodes.add(colHeaders[j]);
                         colHeaders[j].down = node;         //  L'entête de colonne pointe vers le 1er noeud simple de sa colonne
                         if (rootHeader.right.equals(rootHeader)) {
@@ -256,58 +251,59 @@ public class SatsNodesHandler {
         sats = null;
     }
 
-    private void cellsToSatsMatrix() {
+    private void mergeCellsIntoSatsMatrix() {
         for (int i = 0; i <= (gridSize - 1); i = i + 1) {
-            int r = cellsRowColToSatsRow((i / 9), (i % 9), 0);   //  0 = 1e ligne (pour le chiffre 1)
-            for (int k = 0; k <= (gridRows - 1); k = k + 1) {
-                if (k != (cells[i].value - 1)) {
-                    Arrays.fill(sats[r + k], false);   //  Ne garder que les contraintes concernant le chiffre cells[i]
+            if (!cells[i].isEmpty()) {
+                int r = cellsRowColValueToSatsRow((i / gridRows), (i % gridRows), 0);   //  0 = 1e ligne (pour le chiffre 1)
+                for (int k = 0; k <= (gridRows - 1); k = k + 1) {
+                    if (k != (cells[i].value - 1)) {
+                        Arrays.fill(sats[r + k], false);   //  Ne garder que les contraintes concernant le chiffre cells[i]
+                    }
                 }
             }
         }
     }
 
     public void satsNodesToCells() {
-        SatsNode rh = rootHeader.down;
-        do {
-            if (rh.level != FREE) {
-                int sri = rh.satsRow;
-                cells[satsRowToCellIndex(sri)].value = (sri % gridRows) + 1;
+        int size = solutionStack.size();
+        if (size > 0) {
+            for (int i = 0; i <= (size - 1); i = i + 1) {
+                int sr = solutionStack.get(i);
+                cells[satsRowToCellIndex(sr)].value = (sr % gridRows) + 1;
             }
-            rh = rh.down;
-        } while (!rh.equals(rootHeader));
+        }
     }
 
-    private void createCanonicalSatsMatrix() {
+    private void createSatsMatrix() {
         final int CONSTRAINT_TYPES = 4;    //  (RiCj#, Ri#, Ci#, Bi#)
 
         int candidates = gridSize * gridRows;                  //  729 candidats (R1C1#1 -> R9C9#9)
         int constraints = CONSTRAINT_TYPES * gridSize;         //  81 contraintes x 4 types de contrainte
         sats = new boolean[candidates][constraints];
-        int satsColIndex = 0;
+        int satsCol = 0;
         for (int i = 0; i <= (gridRows - 1); i = i + 1) {
             for (int j = 0; j <= (gridRows - 1); j = j + 1) {
                 for (int k = 0; k <= (gridRows - 1); k = k + 1) {
-                    sats[cellsRowColToSatsRow(i, j, k)][satsColIndex + 0 * gridSize] = true;  //  RiCj#  valeur unique dans la cellule
-                    sats[cellsRowColToSatsRow(i, k, j)][satsColIndex + 1 * gridSize] = true;  //  Ri#  valeur unique dans la ligne
-                    sats[cellsRowColToSatsRow(k, i, j)][satsColIndex + 2 * gridSize] = true;  //  Ci#  valeur unique dans la colonne
+                    sats[cellsRowColValueToSatsRow(i, j, k)][satsCol + 0 * gridSize] = true;  //  RiCj#  valeur unique dans la cellule
+                    sats[cellsRowColValueToSatsRow(i, k, j)][satsCol + 1 * gridSize] = true;  //  Ri#  valeur unique dans la ligne
+                    sats[cellsRowColValueToSatsRow(k, i, j)][satsCol + 2 * gridSize] = true;  //  Ci#  valeur unique dans la colonne
                     int p = squareRows * (i / squareRows) + (k / squareRows);    //  i = n° de carré dans la grille
                     int q = squareRows * (i % squareRows) + (k % squareRows);    //  k = n° de cellule dans le carré
-                    sats[cellsRowColToSatsRow(p, q, j)][satsColIndex + 3 * gridSize] = true;  //  Bi#  valeur unique dans le carré
+                    sats[cellsRowColValueToSatsRow(p, q, j)][satsCol + 3 * gridSize] = true;  //  Bi#  valeur unique dans le carré
                 }
-                satsColIndex = satsColIndex + 1;
+                satsCol = satsCol + 1;
             }
         }
     }
 
-    private int cellsRowColToSatsRow(int cellsRow, int cellsCol, int cellValueIndex) {   //  cellValueIndex cad cell.value - 1
+    private int cellsRowColValueToSatsRow(int cellsRow, int cellsCol, int cellValueIndex) {   //  cellValueIndex cad cell.value - 1
         return (gridSize * cellsRow + gridRows * cellsCol + cellValueIndex);
     }
 
     private int satsRowToCellIndex(int satsRow) {
         int row = (satsRow / gridSize);
         int col = (satsRow % gridSize) / gridRows;
-        return (9 * row + col);
+        return (gridRows * row + col);
     }
 
 }

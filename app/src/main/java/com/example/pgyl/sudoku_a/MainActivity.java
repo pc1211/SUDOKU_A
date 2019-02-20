@@ -29,6 +29,7 @@ import static com.example.pgyl.pekislib_a.Constants.COLOR_PREFIX;
 import static com.example.pgyl.pekislib_a.Constants.SHP_FILE_NAME_SUFFIX;
 import static com.example.pgyl.pekislib_a.HelpActivity.HELP_ACTIVITY_TITLE;
 import static com.example.pgyl.pekislib_a.MiscUtils.msgBox;
+import static com.example.pgyl.sudoku_a.Solver.SOLVE_STATES;
 import static com.example.pgyl.sudoku_a.StringShelfDatabaseUtils.cellRowsToCells;
 import static com.example.pgyl.sudoku_a.StringShelfDatabaseUtils.cellsToCellRows;
 import static com.example.pgyl.sudoku_a.StringShelfDatabaseUtils.createTableCellsIfNotExists;
@@ -46,9 +47,7 @@ public class MainActivity extends Activity {
         }
     }
 
-    public enum SUDOKU_SHP_KEY_NAMES {KEEP_SCREEN, SOLVE_STATE, POINTER, EDIT_POINTER}
-
-    public enum SOLVE_STATES {UNKNOWN, SOLUTION_FOUND, IMPOSSIBLE}
+    public enum SUDOKU_SHP_KEY_NAMES {KEEP_SCREEN, EDIT_POINTER}
 
     private final int SQUARE_ROWS = 3;
     private final int GRID_ROWS = SQUARE_ROWS * SQUARE_ROWS;
@@ -182,6 +181,9 @@ public class MainActivity extends Activity {
     private void onKeyboardButtonClick(String input) {
         if (editPointer != NO_EDIT_POINTER) {
             handleCellInput(input);
+            cellsHandler.deleteAllExceptProtectedCells();
+            solver.resetSolveState();
+            needSolverReset = true;
             int oldEditPointer = editPointer;
             editPointer = NO_EDIT_POINTER;
             updateDisplayCellButtonColor(oldEditPointer);
@@ -207,6 +209,7 @@ public class MainActivity extends Activity {
                     if (cmd.equals(COMMANDS.RESET_U)) {
                         cellsHandler.deleteAllExceptProtectedCells();
                     }
+                    solver.resetSolveState();
                     needSolverReset = true;
                 }
             });
@@ -224,6 +227,7 @@ public class MainActivity extends Activity {
         }
         if (command.equals(COMMANDS.SOLVE)) {
             if (needSolverReset) {
+                needSolverReset = false;
                 solver.reset();
             }
             solver.solve();
@@ -236,8 +240,6 @@ public class MainActivity extends Activity {
     }
 
     private void handleCellInput(String input) {
-        cellsHandler.deleteAllExceptProtectedCells();
-        needSolverReset = true;
         if (!input.equals(DELETE_DIGIT_KEYBOARD_BUTTON_VALUE)) {
             int value = Integer.parseInt(input);
             String errorMsg = reportUniqueCellValue(editPointer, value);
@@ -252,13 +254,13 @@ public class MainActivity extends Activity {
 
     private String reportUniqueCellValue(int cellIndex, int cellValue) {
         String ret = "";
-        if (!cellsHandler.isValueUniqueInCellRow(cellIndex, cellValue)) {
+        if (!cellsHandler.isValueUniqueInRow(cellIndex, cellValue)) {
             ret = ret + ((!ret.equals("")) ? " and " : "") + "row";
         }
-        if (!cellsHandler.isValueUniqueInCellCol(cellIndex, cellValue)) {
+        if (!cellsHandler.isValueUniqueInCol(cellIndex, cellValue)) {
             ret = ret + ((!ret.equals("")) ? " and " : "") + "column";
         }
-        if (!cellsHandler.isValueUniqueInCellSquare(cellIndex, cellValue)) {
+        if (!cellsHandler.isValueUniqueInSquare(cellIndex, cellValue)) {
             ret = ret + ((!ret.equals("")) ? " and " : "") + "square";
         }
         if (!ret.equals("")) {

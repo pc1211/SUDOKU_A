@@ -70,7 +70,7 @@ public class StringShelfDatabaseUtils {
 
     public static Cell cellRowToCell(String[] cellRow) {
         return new Cell(
-                Integer.parseInt(cellRow[TABLE_ID_INDEX].substring(CELL_ID.length())),   //  Skip "CELL" prefix
+                Integer.parseInt(cellRow[TABLE_ID_INDEX].substring(CELL_ID.length())),   //  Passer outre le préfixe "CELL"
                 Integer.parseInt(cellRow[TABLE_CELLS_DATA_FIELDS.VALUE.INDEX()]),
                 Integer.parseInt(cellRow[TABLE_CELLS_DATA_FIELDS.STATUS.INDEX()]));
     }
