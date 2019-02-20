@@ -29,6 +29,7 @@ public class SatsNodesHandler {
     }
 
     private void init() {
+        cells = cellsHandler.getCells();
         gridSize = cellsHandler.getGridSize();
         gridRows = cellsHandler.getGridRows();
         squareRows = cellsHandler.getSquareRows();
@@ -38,17 +39,16 @@ public class SatsNodesHandler {
     }
 
     public void close() {
-        cells = null;
-        nodes.clear();
-        nodes = null;
         candidateStack.clear();
         candidateStack = null;
         solutionStack.clear();
         solutionStack = null;
+        nodes.clear();
+        nodes = null;
+        cells = null;
     }
 
     public void reset() {
-        cells = cellsHandler.getCells();
         cellsHandler.deleteAllExceptProtectedCells();
         nodes.clear();
         candidateStack.clear();
@@ -177,6 +177,19 @@ public class SatsNodesHandler {
         }
     }
 
+    public void solutionsToCells() {
+        int size = solutionStack.size();
+        if (size > 0) {
+            for (int i = 0; i <= (size - 1); i = i + 1) {
+                int satsRow = solutionStack.get(i);
+                int row = (satsRow / gridSize);
+                int col = (satsRow % gridSize) / gridRows;
+                int cellIndex = gridRows * row + col;
+                cells[cellIndex].value = (satsRow % gridRows) + 1;
+            }
+        }
+    }
+
     private void satsMatrixToSatsNodes() {
         int candidates = sats.length;
         int constraints = sats[0].length;
@@ -264,16 +277,6 @@ public class SatsNodesHandler {
         }
     }
 
-    public void solutionsToCells() {
-        int size = solutionStack.size();
-        if (size > 0) {
-            for (int i = 0; i <= (size - 1); i = i + 1) {
-                int sr = solutionStack.get(i);
-                cells[satsRowToCellIndex(sr)].value = (sr % gridRows) + 1;
-            }
-        }
-    }
-
     private void createSatsMatrix() {
         final int CONSTRAINT_TYPES = 4;    //  (RiCj#, Ri#, Ci#, Bi#)
 
@@ -298,12 +301,6 @@ public class SatsNodesHandler {
 
     private int cellsRowColValueToSatsRow(int cellsRow, int cellsCol, int cellValueIndex) {   //  cellValueIndex cad cell.value - 1
         return (gridSize * cellsRow + gridRows * cellsCol + cellValueIndex);
-    }
-
-    private int satsRowToCellIndex(int satsRow) {
-        int row = (satsRow / gridSize);
-        int col = (satsRow % gridSize) / gridRows;
-        return (gridRows * row + col);
     }
 
 }
