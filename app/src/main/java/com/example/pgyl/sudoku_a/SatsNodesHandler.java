@@ -264,7 +264,7 @@ public class SatsNodesHandler {
         }
     }
 
-    public void satsNodesToCells() {
+    public void solutionsToCells() {
         int size = solutionStack.size();
         if (size > 0) {
             for (int i = 0; i <= (size - 1); i = i + 1) {

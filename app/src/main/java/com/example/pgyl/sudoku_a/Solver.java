@@ -20,7 +20,7 @@ public class Solver {
     //region Variables
     private SatsNodesHandler satsNodesHandler;
     private SOLVE_STATES solveState;
-    private SatsNode tryRow;
+    private SatsNode candidate;
     //endregion
 
     public Solver(SatsNodesHandler satsNodesHandler) {
@@ -38,7 +38,7 @@ public class Solver {
 
     public void reset() {
         satsNodesHandler.reset();
-        tryRow = null;
+        candidate = null;
         solveState = SOLVE_STATES.UNKNOWN;
     }
 
@@ -57,8 +57,8 @@ public class Solver {
             if (solveState.equals(SOLVE_STATES.SOLUTION_FOUND)) {
                 satsNodesHandler.discardLastSolution();
                 satsNodesHandler.unCover();
-                tryRow = satsNodesHandler.getNextCandidate();
-                if (tryRow != null) {
+                candidate = satsNodesHandler.getNextCandidate();
+                if (candidate != null) {
                     solveState = SOLVE_STATES.UNKNOWN;
                 } else {
                     solveState = SOLVE_STATES.IMPOSSIBLE;
@@ -68,23 +68,23 @@ public class Solver {
                 SatsNode colHeader = satsNodesHandler.chooseColumn();
                 if (colHeader != null) {
                     if (satsNodesHandler.rowCount(colHeader) > 0) {
-                        if (tryRow != null) {
-                            satsNodesHandler.addSolution(tryRow);
+                        if (candidate != null) {
+                            satsNodesHandler.addSolution(candidate);
                         }
                         satsNodesHandler.setNextCandidates(colHeader);
                     } else {
                         satsNodesHandler.unCover();
                     }
-                    tryRow = satsNodesHandler.getNextCandidate();
-                    if (tryRow == null) {
+                    candidate = satsNodesHandler.getNextCandidate();
+                    if (candidate == null) {
                         solveState = SOLVE_STATES.IMPOSSIBLE;
                     }
                 } else {
-                    satsNodesHandler.addSolution(tryRow);
+                    satsNodesHandler.addSolution(candidate);
+                    satsNodesHandler.solutionsToCells();
                     solveState = SOLVE_STATES.SOLUTION_FOUND;
                 }
             }
-            satsNodesHandler.satsNodesToCells();
         }
         if (mOnSolveEndListener != null) {
             mOnSolveEndListener.onSolveEnd();
