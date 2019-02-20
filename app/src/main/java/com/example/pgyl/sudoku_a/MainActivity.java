@@ -180,8 +180,8 @@ public class MainActivity extends Activity {
 
     private void onKeyboardButtonClick(String input) {
         if (editPointer != NO_EDIT_POINTER) {
-            handleCellInput(input);
             cellsHandler.deleteAllExceptProtectedCells();
+            handleCellInput(input);
             solver.resetSolveState();
             needSolverReset = true;
             int oldEditPointer = editPointer;
