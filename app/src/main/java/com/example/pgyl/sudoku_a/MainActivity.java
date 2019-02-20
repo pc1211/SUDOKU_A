@@ -249,6 +249,8 @@ public class MainActivity extends Activity {
             } else {
                 msgBox(errorMsg, this);
             }
+        } else {
+            cells[editPointer].empty();
         }
     }
 
