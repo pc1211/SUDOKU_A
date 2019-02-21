@@ -3,12 +3,13 @@ package com.example.pgyl.sudoku_a;
 public class SatsNode {
 
     //region Variables
-    public SatsNode right;
-    public SatsNode down;
-    public SatsNode rowHeader;
-    public SatsNode colHeader;
-    public int level;         //  Niveau lors duquel soit ce noeud simple a été retenu comme candidat, soit cette entête a vu sa ligne ou colonne couverte
-    public int satsRow;       //  Si entête de ligne: Index de ligne dans la matrice-mère
+    public SatsNode right;      //  Nnoeud simple ou entête de ligne situé à sa droite
+    public SatsNode down;       //  Noeud simple ou entête de colonne situé en-dessous de lui
+    public SatsNode rowHeader;  //  Si Noeud simple: Entête de sa ligne
+    public SatsNode colHeader;  //  Si Noeud simple: Entête de sa colonne
+    public int depth;           //  Si Noeud simple: Profondeur à laquelle le noeud a été retenu comme candidat (pour sa ligne, dans la colonne choisie)
+    public int coverId;         //  Si Entête de ligne (ou de colonne): Identifiant utilisé pour la couverture de sa ligne (ou de sa colonne)
+    public int satsRow;         //  Si Entête de ligne: Index de ligne dans la matrice-mère (satsMatrix)
     //endregion
 
     public SatsNode() {
@@ -20,7 +21,8 @@ public class SatsNode {
         down = null;
         rowHeader = null;
         colHeader = null;
-        level = 0;
+        depth = 0;
+        coverId = 0;
         satsRow = 0;
     }
 

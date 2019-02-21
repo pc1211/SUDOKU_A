@@ -5,10 +5,6 @@ import java.util.Arrays;
 
 public class SatsNodesHandler {
 
-    //region Constantes
-    public static final int FREE = 0;
-    //endregion
-
     //region Variables
     private ArrayList<SatsNode> nodes;
     private ArrayList<SatsNode> candidateStack;
@@ -20,7 +16,7 @@ public class SatsNodesHandler {
     private int gridSize;
     private int gridRows;
     private int squareRows;
-    private int level;
+    private int depth;
     //endregion
 
     public SatsNodesHandler(CellsHandler cellsHandler) {
@@ -56,15 +52,15 @@ public class SatsNodesHandler {
         createSatsMatrix();
         mergeCellsIntoSatsMatrix();
         satsMatrixToSatsNodes();
-        level = 0;
+        depth = 0;
     }
 
     public void setNextCandidates(SatsNode colHeader) {
-        level = level + 1;
+        depth = depth + 1;
         SatsNode nc = colHeader.down;
         while (!nc.equals(colHeader)) {
-            if (nc.rowHeader.level == FREE) {
-                nc.level = level;   //  On inscrit le niveau dans le noeud simple
+            if (nc.rowHeader.coverId == 0) {  //  Ligne non couverte
+                nc.depth = depth;             //  On inscrit la profondeur atteinte dans le noeud simple
                 pushCandidate(nc);
             }
             nc = nc.down;
@@ -74,14 +70,14 @@ public class SatsNodesHandler {
     public SatsNode getNextCandidate() {
         SatsNode ret = popCandidate();
         if (ret != null) {
-            if (ret.level < level) {     //  Le noeud simple date d'un niveau antérieur
-                discardLastSolution();    //  Enlever la fausse piste du niveau actuel
-                while (ret.level < level) {
-                    level = level - 1;
-                    unCover();
+            if (ret.depth < depth) {      //  Le noeud simple date d'une profondeur antérieure
+                discardLastSolution();    //  Enlever la fausse piste
+                while (ret.depth < depth) {
+                    depth = depth - 1;
+                    unCoverRowsAndCols();  // Restaurer l'état antérieur
                 }
             }
-            cover(ret);
+            coverRowsAndCols(ret);
         }
         return ret;
     }
@@ -91,14 +87,14 @@ public class SatsNodesHandler {
         int min = Integer.MAX_VALUE;
         SatsNode ch = rootHeader.right;
         while (!ch.equals(rootHeader)) {
-            if (ch.level == FREE) {
+            if (ch.coverId == 0) {    //  Colonne non couverte
                 int rc = rowCount(ch);
-                if (rc < min) {
+                if (rc < min) {       //  Chercher la colonne avec le minimum de 1 (parmi ses lignes non couvertes)
                     min = rc;
                     ret = ch;
-                }
-                if (rc == 0) {   //  On ne trouvera pas meilleur minimum
-                    break;
+                    if (min == 0) {   //  Plus bas impossible
+                        break;
+                    }
                 }
             }
             ch = ch.right;
@@ -106,11 +102,11 @@ public class SatsNodesHandler {
         return ret;
     }
 
-    public int rowCount(SatsNode colHeader) {
+    public int rowCount(SatsNode colHeader) {  // Compter le nombre de 1 d'une colonne (parmi ses lignes non couvertes)
         int ret = 0;
         SatsNode nc = colHeader.down;
         while (!nc.equals(colHeader)) {
-            if (nc.rowHeader.level == FREE) {
+            if (nc.rowHeader.coverId == 0) {   //  Ligne non couverte
                 ret = ret + 1;
             }
             nc = nc.down;
@@ -118,18 +114,18 @@ public class SatsNodesHandler {
         return ret;
     }
 
-    public void cover(SatsNode node) {
-        SatsNode rh = node.rowHeader;
+    public void coverRowsAndCols(SatsNode satsNode) {  //  Couvrir les lignes et colonnes liées au noeud
+        SatsNode rh = satsNode.rowHeader;
         SatsNode nr = rh.right;
         while (!nr.equals(rh)) {
             SatsNode ch = nr.colHeader;
-            if (ch.level == FREE) {
-                ch.level = level;
+            if (ch.coverId == 0) {      //  Colonne non couverte
+                ch.coverId = depth;     //  Couvrir la colonne (en utilisant la profondeur comme Id)
                 SatsNode nc = ch.down;
                 while (!nc.equals(ch)) {
                     SatsNode rhc = nc.rowHeader;
-                    if (rhc.level == FREE) {
-                        rhc.level = level;
+                    if (rhc.coverId == 0) {    //  Ligne non couverte
+                        rhc.coverId = depth;   //  Couvrir la ligne (en utilisant la profondeur comme Id)
                     }
                     nc = nc.down;
                 }
@@ -138,25 +134,25 @@ public class SatsNodesHandler {
         }
     }
 
-    public void unCover() {
+    public void unCoverRowsAndCols() {     //  Découvrir les lignes et colonnes correspondant à la profondeur actuelle
         SatsNode rh = rootHeader.down;
         while (!rh.equals(rootHeader)) {
-            if (rh.level == level) {
-                rh.level = FREE;
+            if (rh.coverId == depth) {     //  Ligne correspondant à la profondeur actuelle
+                rh.coverId = 0;            //  Découvrir la ligne
             }
             rh = rh.down;
         }
         SatsNode ch = rootHeader.right;
         while (!ch.equals(rootHeader)) {
-            if (ch.level == level) {
-                ch.level = FREE;
+            if (ch.coverId == depth) {    //  Colonne correspondant à la profondeur actuelle
+                ch.coverId = 0;           //  Découvrir la colonne
             }
             ch = ch.right;
         }
     }
 
-    public void pushCandidate(SatsNode node) {
-        candidateStack.add(node);
+    public void pushCandidate(SatsNode SatsNode) {
+        candidateStack.add(SatsNode);
     }
 
     public SatsNode popCandidate() {
@@ -169,8 +165,8 @@ public class SatsNodesHandler {
         return ret;
     }
 
-    public void addSolution(SatsNode node) {
-        solutionStack.add(node.rowHeader.satsRow);
+    public void addSolution(SatsNode satsNode) {
+        solutionStack.add(satsNode.rowHeader.satsRow);
     }
 
     public void discardLastSolution() {

@@ -56,7 +56,7 @@ public class Solver {
         } else {
             if (solveState.equals(SOLVE_STATES.SOLUTION_FOUND)) {
                 satsNodesHandler.discardLastSolution();
-                satsNodesHandler.unCover();
+                satsNodesHandler.unCoverRowsAndCols();
                 candidate = satsNodesHandler.getNextCandidate();
                 if (candidate != null) {
                     solveState = SOLVE_STATES.UNKNOWN;
@@ -73,7 +73,7 @@ public class Solver {
                         }
                         satsNodesHandler.setNextCandidates(colHeader);
                     } else {
-                        satsNodesHandler.unCover();
+                        satsNodesHandler.unCoverRowsAndCols();
                     }
                     candidate = satsNodesHandler.getNextCandidate();
                     if (candidate == null) {
