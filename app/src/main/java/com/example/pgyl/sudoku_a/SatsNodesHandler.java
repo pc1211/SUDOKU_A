@@ -97,6 +97,9 @@ public class SatsNodesHandler {
                     min = rc;
                     ret = ch;
                 }
+                if (rc == 0) {   //  On ne trouvera pas meilleur minimum
+                    break;
+                }
             }
             ch = ch.right;
         }
