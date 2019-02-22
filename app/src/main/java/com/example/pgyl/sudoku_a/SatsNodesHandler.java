@@ -71,11 +71,9 @@ public class SatsNodesHandler {
         SatsNode ret = popCandidate();
         if (ret != null) {
             if (ret.depth < depth) {      //  Le noeud simple date d'une profondeur antérieure
+                depth = ret.depth;
                 discardLastSolution();    //  Enlever la fausse piste
-                while (ret.depth < depth) {
-                    depth = depth - 1;
-                    uncoverRowsAndCols();  // Restaurer l'état antérieur
-                }
+                uncoverRowsAndCols();     //  Restaurer parfois plusieurs niveaux de profondeur en une fois si (depth - ret.depth) > 1
             }
             coverRowsAndCols(ret);
         }
@@ -87,12 +85,12 @@ public class SatsNodesHandler {
         int min = Integer.MAX_VALUE;
         SatsNode ch = rootHeader.right;
         while (!ch.equals(rootHeader)) {
-            if (ch.coverId == 0) {    //  Colonne non couverte
+            if (ch.coverId == 0) {      //  Colonne non couverte
                 int rc = rowCount(ch);
-                if (rc < min) {       //  Chercher la colonne avec le minimum de 1 (parmi ses lignes non couvertes)
+                if (rc < min) {         //  Chercher la colonne avec le minimum de 1 (parmi ses lignes non couvertes)
                     min = rc;
                     ret = ch;
-                    if (min == 0) {   //  Plus bas impossible
+                    if (min == 0) {     //  Plus bas impossible
                         break;
                     }
                 }
@@ -134,17 +132,17 @@ public class SatsNodesHandler {
         }
     }
 
-    public void uncoverRowsAndCols() {     //  Découvrir les lignes et colonnes correspondant à la profondeur actuelle
+    public void uncoverRowsAndCols() {     //  Découvrir les lignes et colonnes nécessaires pour remonter à une profondeur antérieure
         SatsNode rh = rootHeader.down;
         while (!rh.equals(rootHeader)) {
-            if (rh.coverId == depth) {     //  Ligne correspondant à la profondeur actuelle
+            if (rh.coverId >= depth) {
                 rh.coverId = 0;            //  Découvrir la ligne
             }
             rh = rh.down;
         }
         SatsNode ch = rootHeader.right;
         while (!ch.equals(rootHeader)) {
-            if (ch.coverId == depth) {    //  Colonne correspondant à la profondeur actuelle
+            if (ch.coverId >= depth) {
                 ch.coverId = 0;           //  Découvrir la colonne
             }
             ch = ch.right;
