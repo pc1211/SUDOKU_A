@@ -72,8 +72,8 @@ public class SatsNodesHandler {
         if (ret != null) {
             if (ret.depth < depth) {      //  Le noeud simple date d'une profondeur antérieure
                 discardLastSolution();    //  Enlever la fausse piste
-                if (ret.depth < depth) {
-                    depth = ret.depth;
+                while (ret.depth < depth) {
+                    depth = depth - 1;
                     uncoverRowsAndCols();  // Restaurer l'état antérieur
                 }
             }
@@ -134,17 +134,17 @@ public class SatsNodesHandler {
         }
     }
 
-    public void uncoverRowsAndCols() {     //  Découvrir les lignes et colonnes de profondeur supérieure ou égale à la profondeur actuelle
+    public void uncoverRowsAndCols() {     //  Découvrir les lignes et colonnes correspondant à la profondeur actuelle
         SatsNode rh = rootHeader.down;
         while (!rh.equals(rootHeader)) {
-            if (rh.coverId >= depth) {     //  Ligne correspondant à la profondeur actuelle
+            if (rh.coverId == depth) {     //  Ligne correspondant à la profondeur actuelle
                 rh.coverId = 0;            //  Découvrir la ligne
             }
             rh = rh.down;
         }
         SatsNode ch = rootHeader.right;
         while (!ch.equals(rootHeader)) {
-            if (ch.coverId >= depth) {    //  Colonne correspondant à la profondeur actuelle
+            if (ch.coverId == depth) {    //  Colonne correspondant à la profondeur actuelle
                 ch.coverId = 0;           //  Découvrir la colonne
             }
             ch = ch.right;
