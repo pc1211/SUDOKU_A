@@ -16,7 +16,7 @@ public class SatsNodesHandler {
     private int gridSize;
     private int gridRows;
     private int squareRows;
-    private int depth;
+    private int level;
     //endregion
 
     public SatsNodesHandler(CellsHandler cellsHandler) {
@@ -52,15 +52,15 @@ public class SatsNodesHandler {
         createSatsMatrix();
         mergeCellsIntoSatsMatrix();
         satsMatrixToSatsNodes();
-        depth = 0;
+        level = 0;
     }
 
     public void setNextCandidates(SatsNode colHeader) {
-        depth = depth + 1;
+        level = level + 1;
         SatsNode nc = colHeader.down;
         while (!nc.equals(colHeader)) {
             if (nc.rowHeader.coverId == 0) {  //  Ligne non couverte
-                nc.depth = depth;             //  On inscrit la profondeur atteinte dans le noeud simple
+                nc.level = level;             //  On inscrit le niveau actuel dans le noeud simple
                 pushCandidate(nc);
             }
             nc = nc.down;
@@ -70,10 +70,10 @@ public class SatsNodesHandler {
     public SatsNode getNextCandidate() {
         SatsNode ret = popCandidate();
         if (ret != null) {
-            if (ret.depth < depth) {      //  Le noeud simple date d'une profondeur antérieure
-                depth = ret.depth;
-                discardLastSolution();    //  Enlever la fausse piste
-                uncoverRowsAndCols();     //  Restaurer parfois plusieurs niveaux de profondeur en une fois si (depth - ret.depth) > 1
+            if (ret.level < level) {      //  Le noeud simple date d'un niveau antérieur
+                level = ret.level;
+                discardLastSolution();    //  Enlever la dernière solution car on doit revenir à un niveau antérieur
+                uncoverRowsAndCols();     //  Restaurer parfois plusieurs niveaux en une fois si (level - ret.level) > 1
             }
             coverRowsAndCols(ret);
         }
@@ -118,12 +118,12 @@ public class SatsNodesHandler {
         while (!nr.equals(rh)) {
             SatsNode ch = nr.colHeader;
             if (ch.coverId == 0) {      //  Colonne non couverte
-                ch.coverId = depth;     //  Couvrir la colonne (en utilisant la profondeur comme Id)
+                ch.coverId = level;     //  Couvrir la colonne (en utilisant le niveau actuel comme Id)
                 SatsNode nc = ch.down;
                 while (!nc.equals(ch)) {
                     SatsNode rhc = nc.rowHeader;
                     if (rhc.coverId == 0) {    //  Ligne non couverte
-                        rhc.coverId = depth;   //  Couvrir la ligne (en utilisant la profondeur comme Id)
+                        rhc.coverId = level;   //  Couvrir la ligne (en utilisant le niveau actuel comme Id)
                     }
                     nc = nc.down;
                 }
@@ -132,17 +132,17 @@ public class SatsNodesHandler {
         }
     }
 
-    public void uncoverRowsAndCols() {     //  Découvrir les lignes et colonnes nécessaires pour remonter à une profondeur antérieure
+    public void uncoverRowsAndCols() {     //  Découvrir les lignes et colonnes nécessaires pour revenir à un niveau antérieur
         SatsNode rh = rootHeader.down;
         while (!rh.equals(rootHeader)) {
-            if (rh.coverId >= depth) {
+            if (rh.coverId >= level) {
                 rh.coverId = 0;            //  Découvrir la ligne
             }
             rh = rh.down;
         }
         SatsNode ch = rootHeader.right;
         while (!ch.equals(rootHeader)) {
-            if (ch.coverId >= depth) {
+            if (ch.coverId >= level) {
                 ch.coverId = 0;           //  Découvrir la colonne
             }
             ch = ch.right;

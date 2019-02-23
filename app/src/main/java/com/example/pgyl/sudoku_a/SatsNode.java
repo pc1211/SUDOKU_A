@@ -7,7 +7,7 @@ public class SatsNode {
     public SatsNode down;       //  Noeud simple ou entête de colonne situé en-dessous de lui
     public SatsNode rowHeader;  //  Si Noeud simple: Entête de sa ligne
     public SatsNode colHeader;  //  Si Noeud simple: Entête de sa colonne
-    public int depth;           //  Si Noeud simple: Profondeur à laquelle le noeud a été retenu comme candidat (pour sa ligne, dans la colonne choisie)
+    public int level;           //  Si Noeud simple: niveau auquel le noeud simple a été retenu comme candidat (pour sa ligne, dans la colonne choisie)
     public int coverId;         //  Si Entête de ligne (ou de colonne): Identifiant utilisé pour la couverture de sa ligne (ou de sa colonne)
     public int satsRow;         //  Si Entête de ligne: Index de ligne dans la matrice-mère (satsMatrix)
     //endregion
@@ -21,7 +21,7 @@ public class SatsNode {
         down = null;
         rowHeader = null;
         colHeader = null;
-        depth = 0;
+        level = 0;
         coverId = 0;
         satsRow = 0;
     }

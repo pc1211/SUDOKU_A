@@ -39,7 +39,7 @@ public class Solver {
     public void reset() {
         satsNodesHandler.reset();
         candidate = null;
-        solveState = SOLVE_STATES.UNKNOWN;
+        resetSolveState();
     }
 
     public void resetSolveState() {
@@ -54,7 +54,7 @@ public class Solver {
         if (solveState.equals(SOLVE_STATES.IMPOSSIBLE)) {
             reset();
         } else {
-            if (solveState.equals(SOLVE_STATES.SOLUTION_FOUND)) {
+            if (solveState.equals(SOLVE_STATES.SOLUTION_FOUND)) {   //  Pour continuer
                 satsNodesHandler.discardLastSolution();
                 satsNodesHandler.uncoverRowsAndCols();
                 candidate = satsNodesHandler.getNextCandidate();
