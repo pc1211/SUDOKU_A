@@ -9,6 +9,7 @@ import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.os.Bundle;
+import android.util.TypedValue;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -476,18 +477,23 @@ public class MainActivity extends Activity {
     }
 
     private void setupCellButtonColors() {
+        final int CELL_BUTTON_TEXT_SIZE_SP = 28;
+
         for (int i = 0; i <= (GRID_SIZE - 1); i = i + 1) {
             cellButtons[i].setUnpressedColor(BUTTON_STATES.UNPRESSED.DEFAULT_COLOR());
             cellButtons[i].setPressedColor(BUTTON_STATES.PRESSED.DEFAULT_COLOR());
+            cellButtons[i].setTextSize(TypedValue.COMPLEX_UNIT_SP, CELL_BUTTON_TEXT_SIZE_SP);
         }
     }
 
     private void setupKeyboardButtonColors() {
         final String DELETE_DIGIT_KEYBOARD_BUTTON_TEXT_COLOR = "FF0000";   //  Rouge
         final String NORMAL_DIGIT_KEYBOARD_BUTTON_TEXT_COLOR = "0000FF";   //  Bleu
+        final int KEYBOARD_BUTTON_TEXT_SIZE_SP = 26;
 
         for (int i = 0; i <= (GRID_ROWS); i = i + 1) {   //  10 boutons
             keyboardButtons[i].setTextColor(Color.parseColor(COLOR_PREFIX + ((i == DELETE_DIGIT_KEYBOARD_BUTTON_INDEX) ? DELETE_DIGIT_KEYBOARD_BUTTON_TEXT_COLOR : NORMAL_DIGIT_KEYBOARD_BUTTON_TEXT_COLOR)));
+            keyboardButtons[i].setTextSize(TypedValue.COMPLEX_UNIT_SP, KEYBOARD_BUTTON_TEXT_SIZE_SP);
             keyboardButtons[i].setTypeface(keyboardButtons[i].getTypeface(), Typeface.BOLD);
             keyboardButtons[i].setUnpressedColor(BUTTON_STATES.UNPRESSED.DEFAULT_COLOR());
             keyboardButtons[i].setPressedColor(BUTTON_STATES.PRESSED.DEFAULT_COLOR());
@@ -495,9 +501,12 @@ public class MainActivity extends Activity {
     }
 
     private void setupCommandButtonColors() {
+        final int COMMAND_BUTTON_TEXT_SIZE_SP = 20;
+
         for (final COMMANDS command : COMMANDS.values()) {
             commandButtons[command.INDEX()].setUnpressedColor(BUTTON_STATES.UNPRESSED.DEFAULT_COLOR());
             commandButtons[command.INDEX()].setPressedColor((BUTTON_STATES.PRESSED.DEFAULT_COLOR()));
+            commandButtons[command.INDEX()].setTextSize(TypedValue.COMPLEX_UNIT_SP, COMMAND_BUTTON_TEXT_SIZE_SP);
         }
     }
 
