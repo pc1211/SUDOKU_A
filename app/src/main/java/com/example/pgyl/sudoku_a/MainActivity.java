@@ -54,7 +54,7 @@ public class MainActivity extends Activity {
     private final int GRID_ROWS = SQUARE_ROWS * SQUARE_ROWS;
     private final int GRID_SIZE = GRID_ROWS * GRID_ROWS;
     private final int DELETE_DIGIT_KEYBOARD_BUTTON_INDEX = 0;
-    private final String DELETE_DIGIT_KEYBOARD_BUTTON_VALUE = "X";
+    private final String DELETE_DIGIT_KEYBOARD_BUTTON_VALUE = "x";
     private final int NO_EDIT_POINTER = -1;
     //endregion
     //region Variables
@@ -306,8 +306,8 @@ public class MainActivity extends Activity {
     private void updateDisplayCellButtonColor(int index) {
         final String PROTECTED_UNPRESSED_COLOR = "FF9A22";         //  Orange
         final String PROTECTED_PRESSED_COLOR = "995400";
-        final String ENABLE_EDIT_UNPRESSED_COLOR = "FF0000";       //  Rouge
-        final String ENABLE_EDIT_PRESSED_COLOR = "940000";
+        final String ENABLE_EDIT_UNPRESSED_COLOR = "668CFF";       //  Bleu
+        final String ENABLE_EDIT_PRESSED_COLOR = "0040FF";
 
         if (index == editPointer) {
             cellButtons[index].setUnpressedColor(ENABLE_EDIT_UNPRESSED_COLOR);
@@ -488,7 +488,7 @@ public class MainActivity extends Activity {
 
     private void setupKeyboardButtonColors() {
         final String DELETE_DIGIT_KEYBOARD_BUTTON_TEXT_COLOR = "FF0000";   //  Rouge
-        final String NORMAL_DIGIT_KEYBOARD_BUTTON_TEXT_COLOR = "0000FF";   //  Bleu
+        final String NORMAL_DIGIT_KEYBOARD_BUTTON_TEXT_COLOR = "0040FF";   //  Bleu
         final int KEYBOARD_BUTTON_TEXT_SIZE_SP = 26;
 
         for (int i = 0; i <= (GRID_ROWS); i = i + 1) {   //  10 boutons
