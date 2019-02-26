@@ -67,9 +67,9 @@ public class Solver {
             while (solveState.equals(SOLVE_STATES.UNKNOWN)) {
                 SatsNode colHeader = satsNodesHandler.chooseColumn();
                 if (colHeader != null) {
-                    if (satsNodesHandler.rowCount(colHeader) > 0) {
+                    if (colHeader.rowCount > 0) {
                         if (candidate != null) {
-                            satsNodesHandler.addSolution(candidate);
+                            satsNodesHandler.appendSolution(candidate);
                         }
                         satsNodesHandler.setNextCandidates(colHeader);
                     } else {
@@ -80,7 +80,7 @@ public class Solver {
                         solveState = SOLVE_STATES.IMPOSSIBLE;
                     }
                 } else {
-                    satsNodesHandler.addSolution(candidate);
+                    satsNodesHandler.appendSolution(candidate);
                     satsNodesHandler.solutionsToCells();
                     solveState = SOLVE_STATES.SOLUTION_FOUND;
                 }

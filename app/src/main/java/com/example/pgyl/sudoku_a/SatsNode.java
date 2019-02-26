@@ -10,6 +10,7 @@ public class SatsNode {
     public int level;           //  Si Noeud simple: niveau auquel le noeud simple a été retenu comme candidat (pour sa ligne, dans la colonne choisie)
     public int coverId;         //  Si Entête de ligne (ou de colonne): Identifiant utilisé pour la couverture de sa ligne (ou de sa colonne)
     public int satsRow;         //  Si Entête de ligne: Index de ligne dans la matrice-mère (satsMatrix)
+    public int rowCount;        //  Si Entête de colonne: Nombre de lignes non couvertes dans la colonne
     //endregion
 
     public SatsNode() {

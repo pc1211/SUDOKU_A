@@ -89,6 +89,7 @@ public class SatsNodesHandler {
                 int rc = rowCount(ch);
                 if (rc < min) {         //  Chercher la colonne avec le minimum de 1 (parmi ses lignes non couvertes)
                     min = rc;
+                    ch.rowCount = rc;
                     ret = ch;
                     if (min == 0) {     //  Plus bas impossible
                         break;
@@ -100,70 +101,7 @@ public class SatsNodesHandler {
         return ret;
     }
 
-    public int rowCount(SatsNode colHeader) {  // Compter le nombre de 1 d'une colonne (parmi ses lignes non couvertes)
-        int ret = 0;
-        SatsNode nc = colHeader.down;
-        while (!nc.equals(colHeader)) {
-            if (nc.rowHeader.coverId == 0) {   //  Ligne non couverte
-                ret = ret + 1;
-            }
-            nc = nc.down;
-        }
-        return ret;
-    }
-
-    public void coverRowsAndCols(SatsNode satsNode) {  //  Couvrir les lignes et colonnes liées au noeud
-        SatsNode rh = satsNode.rowHeader;
-        SatsNode nr = rh.right;
-        while (!nr.equals(rh)) {
-            SatsNode ch = nr.colHeader;
-            if (ch.coverId == 0) {      //  Colonne non couverte
-                ch.coverId = level;     //  Couvrir la colonne (en utilisant le niveau actuel comme Id)
-                SatsNode nc = ch.down;
-                while (!nc.equals(ch)) {
-                    SatsNode rhc = nc.rowHeader;
-                    if (rhc.coverId == 0) {    //  Ligne non couverte
-                        rhc.coverId = level;   //  Couvrir la ligne (en utilisant le niveau actuel comme Id)
-                    }
-                    nc = nc.down;
-                }
-            }
-            nr = nr.right;
-        }
-    }
-
-    public void uncoverRowsAndCols() {     //  Découvrir les lignes et colonnes nécessaires pour revenir à un niveau antérieur
-        SatsNode rh = rootHeader.down;
-        while (!rh.equals(rootHeader)) {
-            if (rh.coverId >= level) {
-                rh.coverId = 0;            //  Découvrir la ligne
-            }
-            rh = rh.down;
-        }
-        SatsNode ch = rootHeader.right;
-        while (!ch.equals(rootHeader)) {
-            if (ch.coverId >= level) {
-                ch.coverId = 0;           //  Découvrir la colonne
-            }
-            ch = ch.right;
-        }
-    }
-
-    public void pushCandidate(SatsNode SatsNode) {
-        candidateStack.add(SatsNode);
-    }
-
-    public SatsNode popCandidate() {
-        SatsNode ret = null;
-        int size = candidateStack.size();
-        if (size > 0) {
-            ret = candidateStack.get(size - 1);
-            candidateStack.remove(size - 1);
-        }
-        return ret;
-    }
-
-    public void addSolution(SatsNode satsNode) {
+    public void appendSolution(SatsNode satsNode) {
         solutionStack.add(satsNode.rowHeader.satsRow);
     }
 
@@ -185,6 +123,69 @@ public class SatsNodesHandler {
                 cells[cellIndex].value = (satsRow % gridRows) + 1;
             }
         }
+    }
+
+    public void uncoverRowsAndCols() {     //  Découvrir les lignes et colonnes nécessaires pour revenir à un niveau antérieur
+        SatsNode rh = rootHeader.down;
+        while (!rh.equals(rootHeader)) {
+            if (rh.coverId >= level) {
+                rh.coverId = 0;            //  Découvrir la ligne
+            }
+            rh = rh.down;
+        }
+        SatsNode ch = rootHeader.right;
+        while (!ch.equals(rootHeader)) {
+            if (ch.coverId >= level) {
+                ch.coverId = 0;           //  Découvrir la colonne
+            }
+            ch = ch.right;
+        }
+    }
+
+    private void coverRowsAndCols(SatsNode satsNode) {  //  Couvrir les lignes et colonnes liées au noeud
+        SatsNode rh = satsNode.rowHeader;
+        SatsNode nr = rh.right;
+        while (!nr.equals(rh)) {
+            SatsNode ch = nr.colHeader;
+            if (ch.coverId == 0) {      //  Colonne non couverte
+                ch.coverId = level;     //  Couvrir la colonne (en utilisant le niveau actuel comme Id)
+                SatsNode nc = ch.down;
+                while (!nc.equals(ch)) {
+                    SatsNode rhc = nc.rowHeader;
+                    if (rhc.coverId == 0) {    //  Ligne non couverte
+                        rhc.coverId = level;   //  Couvrir la ligne (en utilisant le niveau actuel comme Id)
+                    }
+                    nc = nc.down;
+                }
+            }
+            nr = nr.right;
+        }
+    }
+
+    private int rowCount(SatsNode colHeader) {  // Compter le nombre de 1 d'une colonne (parmi ses lignes non couvertes)
+        int ret = 0;
+        SatsNode nc = colHeader.down;
+        while (!nc.equals(colHeader)) {
+            if (nc.rowHeader.coverId == 0) {   //  Ligne non couverte
+                ret = ret + 1;
+            }
+            nc = nc.down;
+        }
+        return ret;
+    }
+
+    private void pushCandidate(SatsNode SatsNode) {
+        candidateStack.add(SatsNode);
+    }
+
+    private SatsNode popCandidate() {
+        SatsNode ret = null;
+        int size = candidateStack.size();
+        if (size > 0) {
+            ret = candidateStack.get(size - 1);
+            candidateStack.remove(size - 1);
+        }
+        return ret;
     }
 
     private void satsMatrixToSatsNodes() {
