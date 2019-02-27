@@ -306,8 +306,8 @@ public class MainActivity extends Activity {
     private void updateDisplayCellButtonColor(int index) {
         final String PROTECTED_UNPRESSED_COLOR = "FF9A22";         //  Orange
         final String PROTECTED_PRESSED_COLOR = "995400";
-        final String ENABLE_EDIT_UNPRESSED_COLOR = "668CFF";       //  Bleu
-        final String ENABLE_EDIT_PRESSED_COLOR = "0040FF";
+        final String ENABLE_EDIT_UNPRESSED_COLOR = "3366FF";       //  Bleu
+        final String ENABLE_EDIT_PRESSED_COLOR = "0033CC";
 
         if (index == editPointer) {
             cellButtons[index].setUnpressedColor(ENABLE_EDIT_UNPRESSED_COLOR);
