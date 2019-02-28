@@ -181,7 +181,7 @@ public class MainActivity extends Activity {
 
     private void onKeyboardButtonClick(String input) {
         if (editPointer != NO_EDIT_POINTER) {
-            cellsHandler.deleteAllExceptProtectedCells();
+            cellsHandler.deleteAllUnprotectedCells();
             handleCellInput(input);
             solver.resetSolveState();
             needSolverReset = true;
@@ -196,7 +196,7 @@ public class MainActivity extends Activity {
     private void onCommandButtonClick(COMMANDS command) {
         if ((command.equals(COMMANDS.RESET)) || (command.equals(COMMANDS.RESET_U))) {
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
-            String title = ((command.equals(COMMANDS.RESET)) ? "Delete all cells" : "Delete all Unprotected cells");
+            String title = ((command.equals(COMMANDS.RESET)) ? "Delete all cells" : "Delete all unprotected cells");
             builder.setTitle(title);
             builder.setMessage("Are you sure ?");
             builder.setCancelable(false);
@@ -208,7 +208,7 @@ public class MainActivity extends Activity {
                         cellsHandler.deleteAllCells();
                     }
                     if (cmd.equals(COMMANDS.RESET_U)) {
-                        cellsHandler.deleteAllExceptProtectedCells();
+                        cellsHandler.deleteAllUnprotectedCells();
                     }
                     solver.resetSolveState();
                     needSolverReset = true;

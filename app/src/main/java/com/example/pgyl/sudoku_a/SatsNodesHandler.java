@@ -45,7 +45,7 @@ public class SatsNodesHandler {
     }
 
     public void reset() {
-        cellsHandler.deleteAllExceptProtectedCells();
+        cellsHandler.deleteAllUnprotectedCells();
         nodes.clear();
         candidateStack.clear();
         solutionStack.clear();

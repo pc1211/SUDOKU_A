@@ -39,17 +39,17 @@ public class CellsHandler {
         return squareRows;
     }
 
-    public void deleteAllExceptProtectedCells() {
+    public void deleteAllCells() {
+        for (int i = 0; i <= (gridSize - 1); i = i + 1) {
+            cells[i].empty();
+        }
+    }
+
+    public void deleteAllUnprotectedCells() {
         for (int i = 0; i <= (gridSize - 1); i = i + 1) {
             if (!cells[i].isProtected()) {
                 cells[i].empty();
             }
-        }
-    }
-
-    public void deleteAllCells() {
-        for (int i = 0; i <= (gridSize - 1); i = i + 1) {
-            cells[i].empty();
         }
     }
 
