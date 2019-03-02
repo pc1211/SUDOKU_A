@@ -89,7 +89,6 @@ public class SatsNodesHandler {
                 int rc = rowCount(ch);
                 if (rc < min) {         //  Chercher la colonne avec le minimum de 1 (parmi ses lignes non couvertes)
                     min = rc;
-                    ch.rowCount = rc;
                     ret = ch;
                     if (min == 0) {     //  Plus bas impossible
                         break;
@@ -97,6 +96,9 @@ public class SatsNodesHandler {
                 }
             }
             ch = ch.right;
+        }
+        if (ret != null) {
+            ret.rowCount = min;
         }
         return ret;
     }
