@@ -25,6 +25,7 @@ public class SatsNode {
         level = 0;
         coverId = 0;
         satsRow = 0;
+        rowCount = 0;
     }
 
 }
