@@ -1,7 +1,6 @@
 package com.example.pgyl.sudoku_a;
 
 public class SatsNode {
-
     //region Variables
     public SatsNode right;      //  Nnoeud simple ou entête de ligne situé à sa droite
     public SatsNode down;       //  Noeud simple ou entête de colonne situé en-dessous de lui

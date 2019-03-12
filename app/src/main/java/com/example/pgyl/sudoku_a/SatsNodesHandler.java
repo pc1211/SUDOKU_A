@@ -86,9 +86,18 @@ public class SatsNodesHandler {
         SatsNode ch = rootHeader.right;
         while (!ch.equals(rootHeader)) {
             if (ch.coverId == 0) {      //  Colonne non couverte
-                int rc = rowCount(ch);
-                if (rc < min) {         //  Chercher la colonne avec le minimum de 1 (parmi ses lignes non couvertes)
-                    min = rc;
+                int rowCount = 0;
+                SatsNode nc = ch.down;
+                while (!nc.equals(ch)) {
+                    SatsNode rhc = ch.rowHeader;
+                    if (rhc.coverId == 0) {      //  Ligne non couverte
+                        rowCount = rowCount + 1;
+                    }
+                    nc = nc.down;
+                }
+                ch.rowCount = rowCount;
+                if (rowCount < min) {    //  Chercher la colonne avec le minimum de lignes non couvertes
+                    min = rowCount;
                     ret = ch;
                     if (min == 0) {     //  Plus bas impossible
                         break;
@@ -96,9 +105,6 @@ public class SatsNodesHandler {
                 }
             }
             ch = ch.right;
-        }
-        if (ret != null) {
-            ret.rowCount = min;
         }
         return ret;
     }
@@ -162,18 +168,6 @@ public class SatsNodesHandler {
             }
             nr = nr.right;
         }
-    }
-
-    private int rowCount(SatsNode colHeader) {  // Compter le nombre de 1 d'une colonne (parmi ses lignes non couvertes)
-        int ret = 0;
-        SatsNode nc = colHeader.down;
-        while (!nc.equals(colHeader)) {
-            if (nc.rowHeader.coverId == 0) {   //  Ligne non couverte
-                ret = ret + 1;
-            }
-            nc = nc.down;
-        }
-        return ret;
     }
 
     private void pushCandidate(SatsNode SatsNode) {
