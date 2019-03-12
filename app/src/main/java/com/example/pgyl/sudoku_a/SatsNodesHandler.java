@@ -89,7 +89,7 @@ public class SatsNodesHandler {
                 int rowCount = 0;
                 SatsNode nc = ch.down;
                 while (!nc.equals(ch)) {
-                    SatsNode rhc = ch.rowHeader;
+                    SatsNode rhc = nc.rowHeader;
                     if (rhc.coverId == 0) {      //  Ligne non couverte
                         rowCount = rowCount + 1;
                     }
