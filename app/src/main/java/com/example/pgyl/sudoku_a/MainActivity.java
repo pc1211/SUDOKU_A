@@ -378,7 +378,7 @@ public class MainActivity extends Activity {
         final String ENABLE_EDIT_UNPRESSED_COLOR = "3366FF";  //  Bleu
         final String ENABLE_EDIT_PRESSED_COLOR = "0033CC";
         final String NORMAL_UNPRESSED_COLOR = "4D4D4D";    // Gris
-        final String NORMAL_PRESSED_COLOR = "BFBFBF";
+        final String NORMAL_PRESSED_COLOR = "999999";
 
         if ((editPointer < CRITERION_CELL_EDIT_POINTER) && (index == editPointer)) {
             keyboardButtons[index].setUnpressedColor(ENABLE_EDIT_UNPRESSED_COLOR);
