@@ -538,10 +538,11 @@ public class MainActivity extends Activity {
 
     private void setupKeyboardButtonColors() {
         final String DELETE_DIGIT_KEYBOARD_BUTTON_TEXT_COLOR = "FF0000";   //  Rouge
-        final String NORMAL_DIGIT_KEYBOARD_BUTTON_TEXT_COLOR = "E6E6E6";   //  Gris
+        final String NORMAL_DIGIT_KEYBOARD_BUTTON_TEXT_COLOR = "D9D9D9";   //  Gris
         final int KEYBOARD_BUTTON_TEXT_SIZE_SP = 26;
 
         for (int i = 0; i <= (GRID_ROWS); i = i + 1) {   //  10 boutons
+
             keyboardButtons[i].setTextColor(Color.parseColor(COLOR_PREFIX + ((i == DELETE_DIGIT_KEYBOARD_BUTTON_INDEX) ? DELETE_DIGIT_KEYBOARD_BUTTON_TEXT_COLOR : NORMAL_DIGIT_KEYBOARD_BUTTON_TEXT_COLOR)));
             keyboardButtons[i].setTextSize(TypedValue.COMPLEX_UNIT_SP, KEYBOARD_BUTTON_TEXT_SIZE_SP);
             keyboardButtons[i].setTypeface(keyboardButtons[i].getTypeface(), Typeface.BOLD);
