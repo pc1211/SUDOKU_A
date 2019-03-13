@@ -56,6 +56,7 @@ public class MainActivity extends Activity {
     private final int DELETE_DIGIT_KEYBOARD_BUTTON_INDEX = 0;
     private final String DELETE_DIGIT_KEYBOARD_BUTTON_VALUE = "x";
     private final int NO_EDIT_POINTER = -1;
+    private final int CRITERION_CELL_EDIT_POINTER = 100;   //  Pour distinguer entre boutons chiffres (<100) et boutons cellules (>=100)
     //endregion
     //region Variables
     private CustomButton[] cellButtons;
@@ -126,6 +127,7 @@ public class MainActivity extends Activity {
 
         updateDisplayCellButtonTexts();
         updateDisplayCellButtonColors();
+        updateDisplayKeyboardButtonColors();
         updateDisplayCommandButtonColors();
         updateDisplayKeepScreen();
         invalidateOptionsMenu();
@@ -166,31 +168,58 @@ public class MainActivity extends Activity {
 
     private void onCellButtonClick(int index) {
         if (editPointer != NO_EDIT_POINTER) {
-            if (index != editPointer) {
-                int oldEditPointer = editPointer;
-                editPointer = index;
-                updateDisplayCellButtonColor(oldEditPointer);
+            int oldEditPointer = editPointer;
+            editPointer = index + CRITERION_CELL_EDIT_POINTER;
+            if (oldEditPointer >= CRITERION_CELL_EDIT_POINTER) {
+                oldEditPointer = oldEditPointer - CRITERION_CELL_EDIT_POINTER;
+                if (index != oldEditPointer) {
+                    updateDisplayCellButtonColor(oldEditPointer);
+                } else {
+                    editPointer = NO_EDIT_POINTER;
+                }
             } else {
                 editPointer = NO_EDIT_POINTER;
+                String input = ((oldEditPointer == DELETE_DIGIT_KEYBOARD_BUTTON_INDEX) ? DELETE_DIGIT_KEYBOARD_BUTTON_VALUE : String.valueOf(oldEditPointer));
+                cellsHandler.deleteAllUnprotectedCells();
+                handleCellInput(index, input);
+                updateDisplayKeyboardButtonColor(oldEditPointer);
+                solver.resetSolveState();
+                needSolverReset = true;
+                updateDisplayCellButtonTexts();
+                updateDisplayCommandButtonColors();
             }
         } else {
-            editPointer = index;
+            editPointer = index + CRITERION_CELL_EDIT_POINTER;
         }
         updateDisplayCellButtonColor(index);
     }
 
-    private void onKeyboardButtonClick(String input) {
+    private void onKeyboardButtonClick(int index) {
         if (editPointer != NO_EDIT_POINTER) {
-            cellsHandler.deleteAllUnprotectedCells();
-            handleCellInput(input);
-            solver.resetSolveState();
-            needSolverReset = true;
             int oldEditPointer = editPointer;
-            editPointer = NO_EDIT_POINTER;
-            updateDisplayCellButtonColor(oldEditPointer);
-            updateDisplayCellButtonTexts();
-            updateDisplayCommandButtonColors();
+            editPointer = index;
+            if (oldEditPointer < CRITERION_CELL_EDIT_POINTER) {
+                if (index != oldEditPointer) {
+                    updateDisplayKeyboardButtonColor(oldEditPointer);
+                } else {
+                    editPointer = NO_EDIT_POINTER;
+                }
+            } else {
+                editPointer = NO_EDIT_POINTER;
+                oldEditPointer = oldEditPointer - CRITERION_CELL_EDIT_POINTER;
+                String input = ((index == DELETE_DIGIT_KEYBOARD_BUTTON_INDEX) ? DELETE_DIGIT_KEYBOARD_BUTTON_VALUE : String.valueOf(index));
+                cellsHandler.deleteAllUnprotectedCells();
+                handleCellInput(oldEditPointer, input);
+                updateDisplayCellButtonColor(oldEditPointer);
+                solver.resetSolveState();
+                needSolverReset = true;
+                updateDisplayCellButtonTexts();
+                updateDisplayCommandButtonColors();
+            }
+        } else {
+            editPointer = index;
         }
+        updateDisplayKeyboardButtonColor(index);
     }
 
     private void onCommandButtonClick(COMMANDS command) {
@@ -221,6 +250,7 @@ public class MainActivity extends Activity {
                 public void onDismiss(DialogInterface dialogInterface) {    // OK pour modifier UI sous-jacente à la boîte de dialogue
                     updateDisplayCellButtonTexts();
                     updateDisplayCellButtonColors();
+                    updateDisplayKeyboardButtonColors();
                     updateDisplayCommandButtonColors();
                 }
             });
@@ -240,18 +270,18 @@ public class MainActivity extends Activity {
         updateDisplayCommandButtonColors();
     }
 
-    private void handleCellInput(String input) {
+    private void handleCellInput(int cellIndex, String input) {
         if (!input.equals(DELETE_DIGIT_KEYBOARD_BUTTON_VALUE)) {
             int value = Integer.parseInt(input);
-            String errorMsg = reportUniqueCellValue(editPointer, value);
+            String errorMsg = reportUniqueCellValue(cellIndex, value);
             if (errorMsg.equals("")) {     //  cad pas de remarques
-                cells[editPointer].value = value;
-                cells[editPointer].protect();
+                cells[cellIndex].value = value;
+                cells[cellIndex].protect();
             } else {
                 msgBox(errorMsg, this);
             }
         } else {
-            cells[editPointer].empty();
+            cells[cellIndex].empty();
         }
     }
 
@@ -309,7 +339,7 @@ public class MainActivity extends Activity {
         final String ENABLE_EDIT_UNPRESSED_COLOR = "3366FF";       //  Bleu
         final String ENABLE_EDIT_PRESSED_COLOR = "0033CC";
 
-        if (index == editPointer) {
+        if ((editPointer >= CRITERION_CELL_EDIT_POINTER) && (index == (editPointer - CRITERION_CELL_EDIT_POINTER))) {
             cellButtons[index].setUnpressedColor(ENABLE_EDIT_UNPRESSED_COLOR);
             cellButtons[index].setPressedColor(ENABLE_EDIT_PRESSED_COLOR);
         } else {
@@ -336,6 +366,26 @@ public class MainActivity extends Activity {
         } else {
             cellButtons[index].setText(String.valueOf(cells[index].value));
         }
+    }
+
+    private void updateDisplayKeyboardButtonColors() {
+        for (int i = 0; i <= (GRID_ROWS); i = i + 1) {    //  10 boutons: X, 1, 2, ... 9
+            updateDisplayKeyboardButtonColor(i);
+        }
+    }
+
+    private void updateDisplayKeyboardButtonColor(int index) {
+        final String ENABLE_EDIT_UNPRESSED_COLOR = "3366FF";       //  Bleu
+        final String ENABLE_EDIT_PRESSED_COLOR = "0033CC";
+
+        if ((editPointer < CRITERION_CELL_EDIT_POINTER) && (index == editPointer)) {
+            keyboardButtons[index].setUnpressedColor(ENABLE_EDIT_UNPRESSED_COLOR);
+            keyboardButtons[index].setPressedColor(ENABLE_EDIT_PRESSED_COLOR);
+        } else {
+            keyboardButtons[index].setUnpressedColor(BUTTON_STATES.UNPRESSED.DEFAULT_COLOR());
+            keyboardButtons[index].setPressedColor(BUTTON_STATES.PRESSED.DEFAULT_COLOR());
+        }
+        keyboardButtons[index].updateColor();
     }
 
     private void updateDisplayKeepScreenBarMenuItemIcon(boolean keepScreen) {
@@ -433,7 +483,7 @@ public class MainActivity extends Activity {
                 keyboardButtons[i].setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        onKeyboardButtonClick(value);
+                        onKeyboardButtonClick(index);
                     }
                 });
             } catch (IllegalAccessException ex) {
@@ -480,23 +530,19 @@ public class MainActivity extends Activity {
         final int CELL_BUTTON_TEXT_SIZE_SP = 28;
 
         for (int i = 0; i <= (GRID_SIZE - 1); i = i + 1) {
-            cellButtons[i].setUnpressedColor(BUTTON_STATES.UNPRESSED.DEFAULT_COLOR());
-            cellButtons[i].setPressedColor(BUTTON_STATES.PRESSED.DEFAULT_COLOR());
             cellButtons[i].setTextSize(TypedValue.COMPLEX_UNIT_SP, CELL_BUTTON_TEXT_SIZE_SP);
         }
     }
 
     private void setupKeyboardButtonColors() {
         final String DELETE_DIGIT_KEYBOARD_BUTTON_TEXT_COLOR = "FF0000";   //  Rouge
-        final String NORMAL_DIGIT_KEYBOARD_BUTTON_TEXT_COLOR = "0000FF";   //  Bleu
+        final String NORMAL_DIGIT_KEYBOARD_BUTTON_TEXT_COLOR = "000000";   //  Noir
         final int KEYBOARD_BUTTON_TEXT_SIZE_SP = 26;
 
         for (int i = 0; i <= (GRID_ROWS); i = i + 1) {   //  10 boutons
             keyboardButtons[i].setTextColor(Color.parseColor(COLOR_PREFIX + ((i == DELETE_DIGIT_KEYBOARD_BUTTON_INDEX) ? DELETE_DIGIT_KEYBOARD_BUTTON_TEXT_COLOR : NORMAL_DIGIT_KEYBOARD_BUTTON_TEXT_COLOR)));
             keyboardButtons[i].setTextSize(TypedValue.COMPLEX_UNIT_SP, KEYBOARD_BUTTON_TEXT_SIZE_SP);
             keyboardButtons[i].setTypeface(keyboardButtons[i].getTypeface(), Typeface.BOLD);
-            keyboardButtons[i].setUnpressedColor(BUTTON_STATES.UNPRESSED.DEFAULT_COLOR());
-            keyboardButtons[i].setPressedColor(BUTTON_STATES.PRESSED.DEFAULT_COLOR());
         }
     }
 
@@ -504,8 +550,6 @@ public class MainActivity extends Activity {
         final int COMMAND_BUTTON_TEXT_SIZE_SP = 20;
 
         for (final COMMANDS command : COMMANDS.values()) {
-            commandButtons[command.INDEX()].setUnpressedColor(BUTTON_STATES.UNPRESSED.DEFAULT_COLOR());
-            commandButtons[command.INDEX()].setPressedColor((BUTTON_STATES.PRESSED.DEFAULT_COLOR()));
             commandButtons[command.INDEX()].setTextSize(TypedValue.COMPLEX_UNIT_SP, COMMAND_BUTTON_TEXT_SIZE_SP);
         }
     }
