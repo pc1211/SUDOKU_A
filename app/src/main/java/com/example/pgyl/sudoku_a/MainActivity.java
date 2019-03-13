@@ -377,13 +377,15 @@ public class MainActivity extends Activity {
     private void updateDisplayKeyboardButtonColor(int index) {
         final String ENABLE_EDIT_UNPRESSED_COLOR = "3366FF";  //  Bleu
         final String ENABLE_EDIT_PRESSED_COLOR = "0033CC";
+        final String NORMAL_UNPRESSED_COLOR = "4D4D4D";    // Gris
+        final String NORMAL_PRESSED_COLOR = "BFBFBF";
 
         if ((editPointer < CRITERION_CELL_EDIT_POINTER) && (index == editPointer)) {
             keyboardButtons[index].setUnpressedColor(ENABLE_EDIT_UNPRESSED_COLOR);
             keyboardButtons[index].setPressedColor(ENABLE_EDIT_PRESSED_COLOR);
         } else {
-            keyboardButtons[index].setUnpressedColor(BUTTON_STATES.UNPRESSED.DEFAULT_COLOR());
-            keyboardButtons[index].setPressedColor(BUTTON_STATES.PRESSED.DEFAULT_COLOR());
+            keyboardButtons[index].setUnpressedColor(NORMAL_UNPRESSED_COLOR);
+            keyboardButtons[index].setPressedColor(NORMAL_PRESSED_COLOR);
         }
         keyboardButtons[index].updateColor();
     }
@@ -536,7 +538,7 @@ public class MainActivity extends Activity {
 
     private void setupKeyboardButtonColors() {
         final String DELETE_DIGIT_KEYBOARD_BUTTON_TEXT_COLOR = "FF0000";   //  Rouge
-        final String NORMAL_DIGIT_KEYBOARD_BUTTON_TEXT_COLOR = "009900";   //  Vert
+        final String NORMAL_DIGIT_KEYBOARD_BUTTON_TEXT_COLOR = "E6E6E6";   //  Gris
         final int KEYBOARD_BUTTON_TEXT_SIZE_SP = 26;
 
         for (int i = 0; i <= (GRID_ROWS); i = i + 1) {   //  10 boutons
