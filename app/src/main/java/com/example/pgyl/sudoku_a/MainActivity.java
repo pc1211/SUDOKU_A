@@ -51,7 +51,7 @@ public class MainActivity extends Activity {
 
     private enum EDIT_TYPES {NONE, CELL, DIGIT}
 
-    public enum SUDOKU_SHP_KEY_NAMES {KEEP_SCREEN, EDIT_TYPE, EDIT_INDEX}
+    private enum SUDOKU_SHP_KEY_NAMES {KEEP_SCREEN, EDIT_TYPE, EDIT_INDEX}
 
     private final int SQUARE_ROWS = 3;
     private final int GRID_ROWS = SQUARE_ROWS * SQUARE_ROWS;
