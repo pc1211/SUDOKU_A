@@ -28,6 +28,7 @@ import java.util.logging.Logger;
 import static com.example.pgyl.pekislib_a.Constants.BUTTON_STATES;
 import static com.example.pgyl.pekislib_a.Constants.COLOR_PREFIX;
 import static com.example.pgyl.pekislib_a.Constants.SHP_FILE_NAME_SUFFIX;
+import static com.example.pgyl.pekislib_a.Constants.UNDEFINED;
 import static com.example.pgyl.pekislib_a.HelpActivity.HELP_ACTIVITY_TITLE;
 import static com.example.pgyl.pekislib_a.MiscUtils.msgBox;
 import static com.example.pgyl.sudoku_a.Solver.SOLVE_STATES;
@@ -48,15 +49,15 @@ public class MainActivity extends Activity {
         }
     }
 
-    public enum SUDOKU_SHP_KEY_NAMES {KEEP_SCREEN, EDIT_POINTER}
+    private enum EDIT_TYPES {NONE, CELL, DIGIT}
+
+    public enum SUDOKU_SHP_KEY_NAMES {KEEP_SCREEN, EDIT_TYPE, EDIT_INDEX}
 
     private final int SQUARE_ROWS = 3;
     private final int GRID_ROWS = SQUARE_ROWS * SQUARE_ROWS;
     private final int GRID_SIZE = GRID_ROWS * GRID_ROWS;
     private final int DELETE_DIGIT_KEYBOARD_BUTTON_INDEX = 0;
     private final String DELETE_DIGIT_KEYBOARD_BUTTON_VALUE = "x";
-    private final int NO_EDIT_POINTER = -1;
-    private final int CRITERION_CELL_EDIT_POINTER = 100;   //  Pour distinguer entre boutons chiffres (<100) et boutons cellules (>=100)
     //endregion
     //region Variables
     private CustomButton[] cellButtons;
@@ -71,7 +72,8 @@ public class MainActivity extends Activity {
     private StringShelfDatabase stringShelfDatabase;
     private String shpFileName;
     private boolean keepScreen;
-    private int editPointer;
+    private EDIT_TYPES editType;
+    private int editIndex;
     private boolean needSolverReset;
 
     @Override
@@ -122,7 +124,8 @@ public class MainActivity extends Activity {
         setupKeyboardButtonColors();
         setupCommandButtonColors();
 
-        editPointer = getSHPEditPointer();
+        editType = getSHPEditType();
+        editIndex = getSHPEditIndex();
         needSolverReset = true;
 
         updateDisplayCellButtonTexts();
@@ -167,59 +170,55 @@ public class MainActivity extends Activity {
     }
 
     private void onCellButtonClick(int index) {
-        if (editPointer != NO_EDIT_POINTER) {
-            int oldEditPointer = editPointer;
-            editPointer = index + CRITERION_CELL_EDIT_POINTER;
-            if (oldEditPointer >= CRITERION_CELL_EDIT_POINTER) {
-                oldEditPointer = oldEditPointer - CRITERION_CELL_EDIT_POINTER;
-                if (index != oldEditPointer) {
-                    updateDisplayCellButtonColor(oldEditPointer);
-                } else {
-                    editPointer = NO_EDIT_POINTER;
-                }
+        EDIT_TYPES oldEditType = editType;
+        int oldEditIndex = editIndex;
+        editType = EDIT_TYPES.CELL;
+        editIndex = index;
+        if (oldEditType.equals(EDIT_TYPES.CELL)) {  //  Click CELL puis CELL
+            if (editIndex != oldEditIndex) {
+                updateDisplayCellButtonColor(oldEditIndex);
             } else {
-                editPointer = NO_EDIT_POINTER;
-                String input = ((oldEditPointer == DELETE_DIGIT_KEYBOARD_BUTTON_INDEX) ? DELETE_DIGIT_KEYBOARD_BUTTON_VALUE : String.valueOf(oldEditPointer));
-                cellsHandler.deleteAllUnprotectedCells();
-                handleCellInput(index, input);
-                updateDisplayKeyboardButtonColor(oldEditPointer);
-                solver.resetSolveState();
-                needSolverReset = true;
-                updateDisplayCellButtonTexts();
-                updateDisplayCommandButtonColors();
+                editType = EDIT_TYPES.NONE;
             }
-        } else {
-            editPointer = index + CRITERION_CELL_EDIT_POINTER;
         }
-        updateDisplayCellButtonColor(index);
+        if (oldEditType.equals(EDIT_TYPES.DIGIT)) {  //  Click DIGIT puis CELL
+            editType = EDIT_TYPES.NONE;
+            String input = ((oldEditIndex == DELETE_DIGIT_KEYBOARD_BUTTON_INDEX) ? DELETE_DIGIT_KEYBOARD_BUTTON_VALUE : String.valueOf(oldEditIndex));
+            cellsHandler.deleteAllUnprotectedCells();
+            handleCellInput(index, input);
+            updateDisplayKeyboardButtonColor(oldEditIndex);
+            solver.resetSolveState();
+            needSolverReset = true;
+            updateDisplayCellButtonTexts();
+            updateDisplayCommandButtonColors();
+        }
+        updateDisplayCellButtonColor(editIndex);
     }
 
     private void onKeyboardButtonClick(int index) {
-        if (editPointer != NO_EDIT_POINTER) {
-            int oldEditPointer = editPointer;
-            editPointer = index;
-            if (oldEditPointer < CRITERION_CELL_EDIT_POINTER) {
-                if (index != oldEditPointer) {
-                    updateDisplayKeyboardButtonColor(oldEditPointer);
-                } else {
-                    editPointer = NO_EDIT_POINTER;
-                }
+        EDIT_TYPES oldEditType = editType;
+        int oldEditIndex = editIndex;
+        editType = EDIT_TYPES.DIGIT;
+        editIndex = index;
+        if (oldEditType.equals(EDIT_TYPES.DIGIT)) {   //  Click DIGIT puis DIGIT
+            if (editIndex != oldEditIndex) {
+                updateDisplayKeyboardButtonColor(oldEditIndex);
             } else {
-                editPointer = NO_EDIT_POINTER;
-                oldEditPointer = oldEditPointer - CRITERION_CELL_EDIT_POINTER;
-                String input = ((index == DELETE_DIGIT_KEYBOARD_BUTTON_INDEX) ? DELETE_DIGIT_KEYBOARD_BUTTON_VALUE : String.valueOf(index));
-                cellsHandler.deleteAllUnprotectedCells();
-                handleCellInput(oldEditPointer, input);
-                updateDisplayCellButtonColor(oldEditPointer);
-                solver.resetSolveState();
-                needSolverReset = true;
-                updateDisplayCellButtonTexts();
-                updateDisplayCommandButtonColors();
+                editType = EDIT_TYPES.NONE;
             }
-        } else {
-            editPointer = index;
         }
-        updateDisplayKeyboardButtonColor(index);
+        if (oldEditType.equals(EDIT_TYPES.CELL)) {   //  Click CELL puis DIGIT
+            editType = EDIT_TYPES.NONE;
+            String input = ((editIndex == DELETE_DIGIT_KEYBOARD_BUTTON_INDEX) ? DELETE_DIGIT_KEYBOARD_BUTTON_VALUE : String.valueOf(editIndex));
+            cellsHandler.deleteAllUnprotectedCells();
+            handleCellInput(oldEditIndex, input);
+            updateDisplayCellButtonColor(oldEditIndex);
+            solver.resetSolveState();
+            needSolverReset = true;
+            updateDisplayCellButtonTexts();
+            updateDisplayCommandButtonColors();
+        }
+        updateDisplayKeyboardButtonColor(editIndex);
     }
 
     private void onCommandButtonClick(COMMANDS command) {
@@ -339,7 +338,7 @@ public class MainActivity extends Activity {
         final String ENABLE_EDIT_UNPRESSED_COLOR = "3366FF";       //  Bleu
         final String ENABLE_EDIT_PRESSED_COLOR = "0033CC";
 
-        if ((editPointer >= CRITERION_CELL_EDIT_POINTER) && (index == (editPointer - CRITERION_CELL_EDIT_POINTER))) {
+        if ((editType.equals(EDIT_TYPES.CELL)) && (index == editIndex)) {
             cellButtons[index].setUnpressedColor(ENABLE_EDIT_UNPRESSED_COLOR);
             cellButtons[index].setPressedColor(ENABLE_EDIT_PRESSED_COLOR);
         } else {
@@ -380,7 +379,7 @@ public class MainActivity extends Activity {
         final String NORMAL_UNPRESSED_COLOR = "4D4D4D";    // Gris
         final String NORMAL_PRESSED_COLOR = "999999";
 
-        if ((editPointer < CRITERION_CELL_EDIT_POINTER) && (index == editPointer)) {
+        if ((editType.equals(EDIT_TYPES.DIGIT)) && (index == editIndex)) {
             keyboardButtons[index].setUnpressedColor(ENABLE_EDIT_UNPRESSED_COLOR);
             keyboardButtons[index].setPressedColor(ENABLE_EDIT_PRESSED_COLOR);
         } else {
@@ -405,14 +404,20 @@ public class MainActivity extends Activity {
     private void savePreferences() {
         SharedPreferences shp = getSharedPreferences(shpFileName, MODE_PRIVATE);
         SharedPreferences.Editor shpEditor = shp.edit();
-        shpEditor.putInt(SUDOKU_SHP_KEY_NAMES.EDIT_POINTER.toString(), editPointer);
+        shpEditor.putString(SUDOKU_SHP_KEY_NAMES.EDIT_TYPE.toString(), getSHPEditType().toString());
+        shpEditor.putInt(SUDOKU_SHP_KEY_NAMES.EDIT_INDEX.toString(), editIndex);
         shpEditor.putBoolean(SUDOKU_SHP_KEY_NAMES.KEEP_SCREEN.toString(), keepScreen);
         shpEditor.commit();
     }
 
-    private int getSHPEditPointer() {
+    private EDIT_TYPES getSHPEditType() {
         SharedPreferences shp = getSharedPreferences(shpFileName, MODE_PRIVATE);
-        return shp.getInt(SUDOKU_SHP_KEY_NAMES.EDIT_POINTER.toString(), -1);
+        return EDIT_TYPES.valueOf(shp.getString(SUDOKU_SHP_KEY_NAMES.EDIT_TYPE.toString(), EDIT_TYPES.NONE.toString()));
+    }
+
+    private int getSHPEditIndex() {
+        SharedPreferences shp = getSharedPreferences(shpFileName, MODE_PRIVATE);
+        return shp.getInt(SUDOKU_SHP_KEY_NAMES.EDIT_INDEX.toString(), UNDEFINED);
     }
 
     private boolean getSHPKeepScreen() {
