@@ -447,9 +447,9 @@ public class MainActivity extends Activity {
     }
 
     private void setupCellButtons() {
-        final String BIG_LINE_XML_PREFIX = "BIG_LINE_";
-        final String SQUARE_XML_PREFIX = "SQUARE_";
-        final String SMALL_LINE_XML_PREFIX = "SMALL_LINE_";
+        final String CELL_BIG_LINE_XML_PREFIX = "CELL_BIG_LINE_";
+        final String CELL_SQUARE_XML_PREFIX = "CELL_SQUARE_";
+        final String CELL_SMALL_LINE_XML_PREFIX = "CELL_SMALL_LINE_";
         final String BUTTON_XML_PREFIX = "BTN_";
         final long BUTTON_MIN_CLICK_TIME_INTERVAL_MS = 500;
 
@@ -457,13 +457,13 @@ public class MainActivity extends Activity {
         Class rid = R.id.class;
         for (int i = 0; i <= (SQUARE_ROWS - 1); i = i + 1) {    //  3 grosses lignes dans la grille
             try {
-                LinearLayout bigLineLayout = findViewById(rid.getField(BIG_LINE_XML_PREFIX + String.valueOf(i)).getInt(rid));
+                LinearLayout bigLineLayout = findViewById(rid.getField(CELL_BIG_LINE_XML_PREFIX + String.valueOf(i)).getInt(rid));
                 for (int j = 0; j <= (SQUARE_ROWS - 1); j = j + 1) {    //  3 carrés par grosse ligne, disposés horizontalement
                     try {
-                        LinearLayout squareLayout = bigLineLayout.findViewById(rid.getField(SQUARE_XML_PREFIX + String.valueOf(j)).getInt(rid));
+                        LinearLayout squareLayout = bigLineLayout.findViewById(rid.getField(CELL_SQUARE_XML_PREFIX + String.valueOf(j)).getInt(rid));
                         for (int k = 0; k <= (SQUARE_ROWS - 1); k = k + 1) {    //  3 petites lignes par carré
                             try {
-                                LinearLayout smallLineLayout = squareLayout.findViewById(rid.getField(SMALL_LINE_XML_PREFIX + String.valueOf(k)).getInt(rid));
+                                LinearLayout smallLineLayout = squareLayout.findViewById(rid.getField(CELL_SMALL_LINE_XML_PREFIX + String.valueOf(k)).getInt(rid));
                                 for (int l = 0; l <= (SQUARE_ROWS - 1); l = l + 1) {   //  3 boutons par petite ligne, disposés horizontalement
                                     try {
                                         int cellIndex = i * SQUARE_ROWS * GRID_ROWS + k * GRID_ROWS + j * SQUARE_ROWS + l;
@@ -542,31 +542,40 @@ public class MainActivity extends Activity {
     }
 
     private void setupCommandButtons() {
+        final String COMMAND_LINE_XML_ID = "COMMAND_LINE";
         final String BUTTON_COMMAND_XML_PREFIX = "BTN_";
         final long BUTTON_MIN_CLICK_TIME_INTERVAL_MS = 500;
 
         commandButtons = new CustomButton[COMMANDS.values().length];
         Class rid = R.id.class;
-        for (COMMANDS command : COMMANDS.values())
-            try {
-                commandButtons[command.INDEX()] = findViewById(rid.getField(BUTTON_COMMAND_XML_PREFIX + command.toString()).getInt(rid));
-                commandButtons[command.INDEX()].setMinClickTimeInterval(BUTTON_MIN_CLICK_TIME_INTERVAL_MS);
-                final COMMANDS fcommand = command;
-                commandButtons[command.INDEX()].setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        onCommandButtonClick(fcommand);
-                    }
-                });
-            } catch (IllegalAccessException ex) {
-                Logger.getLogger(MainActivity.class.getName()).log(Level.SEVERE, null, ex);
-            } catch (IllegalArgumentException ex) {
-                Logger.getLogger(MainActivity.class.getName()).log(Level.SEVERE, null, ex);
-            } catch (NoSuchFieldException ex) {
-                Logger.getLogger(MainActivity.class.getName()).log(Level.SEVERE, null, ex);
-            } catch (SecurityException ex) {
-                Logger.getLogger(MainActivity.class.getName()).log(Level.SEVERE, null, ex);
+        try {
+            LinearLayout commandLineLayout = findViewById(rid.getField(COMMAND_LINE_XML_ID).getInt(rid));
+            for (COMMANDS command : COMMANDS.values()) {
+                try {
+                    commandButtons[command.INDEX()] = commandLineLayout.findViewById(rid.getField(BUTTON_COMMAND_XML_PREFIX + command.toString()).getInt(rid));
+                    commandButtons[command.INDEX()].setMinClickTimeInterval(BUTTON_MIN_CLICK_TIME_INTERVAL_MS);
+                    final COMMANDS fcommand = command;
+                    commandButtons[command.INDEX()].setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            onCommandButtonClick(fcommand);
+                        }
+                    });
+                } catch (IllegalAccessException ex) {
+                    Logger.getLogger(MainActivity.class.getName()).log(Level.SEVERE, null, ex);
+                } catch (IllegalArgumentException ex) {
+                    Logger.getLogger(MainActivity.class.getName()).log(Level.SEVERE, null, ex);
+                } catch (NoSuchFieldException ex) {
+                    Logger.getLogger(MainActivity.class.getName()).log(Level.SEVERE, null, ex);
+                } catch (SecurityException ex) {
+                    Logger.getLogger(MainActivity.class.getName()).log(Level.SEVERE, null, ex);
+                }
             }
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        } catch (NoSuchFieldException e) {
+            e.printStackTrace();
+        }
     }
 
     private void setupCellButtonColors() {

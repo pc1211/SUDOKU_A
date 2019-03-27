@@ -2,52 +2,30 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:layout_marginTop="4dp"
     android:background="@android:color/black"
     android:orientation="vertical">
 
-    <include
-        android:id="@+id/BIG_LINE_0"
-        layout="@layout/bigline"></include>
+    <Space
+        android:layout_width="match_parent"
+        android:layout_height="4dp" />
 
     <include
-        android:id="@+id/BIG_LINE_1"
-        layout="@layout/bigline"></include>
+        android:id="@+id/CELL_BIG_LINE_0"
+        layout="@layout/cellbigline"></include>
 
     <include
-        android:id="@+id/BIG_LINE_2"
-        layout="@layout/bigline"></include>
+        android:id="@+id/CELL_BIG_LINE_1"
+        layout="@layout/cellbigline"></include>
+
+    <include
+        android:id="@+id/CELL_BIG_LINE_2"
+        layout="@layout/cellbigline"></include>
 
     <include
         android:id="@+id/DIGIT_LINE"
         layout="@layout/digitline"></include>
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:orientation="horizontal">
-
-        <com.example.pgyl.pekislib_a.CustomButton
-            android:id="@+id/BTN_RESET"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:text="Reset" />
-
-        <com.example.pgyl.pekislib_a.CustomButton
-            android:id="@+id/BTN_RESET_U"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:text="Reset U" />
-
-        <com.example.pgyl.pekislib_a.CustomButton
-            android:id="@+id/BTN_SOLVE"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:text="Solve"
-            android:textStyle="bold" />
-    </LinearLayout>
+    <include
+        android:id="@+id/COMMAND_LINE"
+        layout="@layout/commandline"></include>
 </LinearLayout>

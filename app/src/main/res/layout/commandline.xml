@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="0dp"
+    android:layout_weight="1"
+    android:orientation="horizontal">
+
+    <com.example.pgyl.pekislib_a.CustomButton
+        android:id="@+id/BTN_RESET"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:text="Reset" />
+
+    <com.example.pgyl.pekislib_a.CustomButton
+        android:id="@+id/BTN_RESET_U"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:text="Reset U" />
+
+    <com.example.pgyl.pekislib_a.CustomButton
+        android:id="@+id/BTN_SOLVE"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:text="Solve"
+        android:textStyle="bold" />
+</LinearLayout>

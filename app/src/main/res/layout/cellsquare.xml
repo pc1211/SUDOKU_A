@@ -7,14 +7,14 @@
     android:orientation="vertical">
 
     <include
-        android:id="@+id/SMALL_LINE_0"
-        layout="@layout/smallline"></include>
+        android:id="@+id/CELL_SMALL_LINE_0"
+        layout="@layout/cellsmallline"></include>
 
     <include
-        android:id="@+id/SMALL_LINE_1"
-        layout="@layout/smallline"></include>
+        android:id="@+id/CELL_SMALL_LINE_1"
+        layout="@layout/cellsmallline"></include>
 
     <include
-        android:id="@+id/SMALL_LINE_2"
-        layout="@layout/smallline"></include>
+        android:id="@+id/CELL_SMALL_LINE_2"
+        layout="@layout/cellsmallline"></include>
 </LinearLayout>
