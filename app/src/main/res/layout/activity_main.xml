@@ -863,74 +863,74 @@
         android:orientation="horizontal">
 
         <com.example.pgyl.pekislib_a.CustomButton
-            android:id="@+id/BTN_K1"
+            android:id="@+id/BTN_D1"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:text="K1" />
+            android:text="D1" />
 
         <com.example.pgyl.pekislib_a.CustomButton
-            android:id="@+id/BTN_K2"
+            android:id="@+id/BTN_D2"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:text="K2" />
+            android:text="D2" />
 
         <com.example.pgyl.pekislib_a.CustomButton
-            android:id="@+id/BTN_K3"
+            android:id="@+id/BTN_D3"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:text="K3" />
+            android:text="D3" />
 
         <com.example.pgyl.pekislib_a.CustomButton
-            android:id="@+id/BTN_K4"
+            android:id="@+id/BTN_D4"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:text="K4" />
+            android:text="D4" />
 
         <com.example.pgyl.pekislib_a.CustomButton
-            android:id="@+id/BTN_K5"
+            android:id="@+id/BTN_D5"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:text="K5" />
+            android:text="D5" />
 
         <com.example.pgyl.pekislib_a.CustomButton
-            android:id="@+id/BTN_K6"
+            android:id="@+id/BTN_D6"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:text="K6" />
+            android:text="D6" />
 
         <com.example.pgyl.pekislib_a.CustomButton
-            android:id="@+id/BTN_K7"
+            android:id="@+id/BTN_D7"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:text="K7" />
+            android:text="D7" />
 
         <com.example.pgyl.pekislib_a.CustomButton
-            android:id="@+id/BTN_K8"
+            android:id="@+id/BTN_D8"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:text="K8" />
+            android:text="D8" />
 
         <com.example.pgyl.pekislib_a.CustomButton
-            android:id="@+id/BTN_K9"
+            android:id="@+id/BTN_D9"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:text="K9" />
+            android:text="D9" />
 
         <com.example.pgyl.pekislib_a.CustomButton
-            android:id="@+id/BTN_K10"
+            android:id="@+id/BTN_D10"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:text="K10" />
+            android:text="D10" />
     </LinearLayout>
 
     <LinearLayout

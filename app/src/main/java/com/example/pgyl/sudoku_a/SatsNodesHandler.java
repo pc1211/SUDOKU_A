@@ -252,9 +252,6 @@ public class SatsNodesHandler {
         if (lastColHeader != rootHeader) {
             lastColHeader.right = rootHeader;           //  La dernière entête de colonne pointe vers l'entête des entêtes
         }
-        lastColNode = null;
-        colHeaders = null;
-        lastRowNodes = null;
         sats = null;
     }
 
