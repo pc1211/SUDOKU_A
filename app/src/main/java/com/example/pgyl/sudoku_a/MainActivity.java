@@ -15,6 +15,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.LinearLayout;
 
 import com.example.pgyl.pekislib_a.Constants.ACTIVITY_EXTRA_KEYS;
 import com.example.pgyl.pekislib_a.CustomButton;
@@ -446,62 +447,97 @@ public class MainActivity extends Activity {
     }
 
     private void setupCellButtons() {
-        final String CELL_BUTTON_XML_PREFIX = "BTN_P";
+        final String BIG_LINE_XML_PREFIX = "BIG_LINE_";
+        final String SQUARE_XML_PREFIX = "SQUARE_";
+        final String SMALL_LINE_XML_PREFIX = "SMALL_LINE_";
+        final String BUTTON_XML_PREFIX = "BTN_";
         final long BUTTON_MIN_CLICK_TIME_INTERVAL_MS = 500;
 
         cellButtons = new CustomButton[GRID_SIZE];
         Class rid = R.id.class;
-        for (int i = 0; i <= (GRID_SIZE - 1); i = i + 1) {
+        for (int i = 0; i <= (SQUARE_ROWS - 1); i = i + 1) {    //  3 grosses lignes dans la grille
             try {
-                cellButtons[i] = findViewById(rid.getField(CELL_BUTTON_XML_PREFIX + (i + 1)).getInt(rid));  // BTN_P1, BTN_P2, ...
-                cellButtons[i].setMinClickTimeInterval(BUTTON_MIN_CLICK_TIME_INTERVAL_MS);
-                final int index = i;
-                cellButtons[i].setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        onCellButtonClick(index);
+                LinearLayout bigLineLayout = findViewById(rid.getField(BIG_LINE_XML_PREFIX + String.valueOf(i)).getInt(rid));
+                for (int j = 0; j <= (SQUARE_ROWS - 1); j = j + 1) {    //  3 carrés par grosse ligne, disposés horizontalement
+                    try {
+                        LinearLayout squareLayout = bigLineLayout.findViewById(rid.getField(SQUARE_XML_PREFIX + String.valueOf(j)).getInt(rid));
+                        for (int k = 0; k <= (SQUARE_ROWS - 1); k = k + 1) {    //  3 petites lignes par carré
+                            try {
+                                LinearLayout smallLineLayout = squareLayout.findViewById(rid.getField(SMALL_LINE_XML_PREFIX + String.valueOf(k)).getInt(rid));
+                                for (int l = 0; l <= (SQUARE_ROWS - 1); l = l + 1) {   //  3 boutons par petite ligne, disposés horizontalement
+                                    try {
+                                        int cellIndex = i * SQUARE_ROWS * GRID_ROWS + k * GRID_ROWS + j * SQUARE_ROWS + l;
+                                        cellButtons[cellIndex] = smallLineLayout.findViewById(rid.getField(BUTTON_XML_PREFIX + String.valueOf(l)).getInt(rid));
+                                        cellButtons[cellIndex].setMinClickTimeInterval(BUTTON_MIN_CLICK_TIME_INTERVAL_MS);
+                                        final int index = cellIndex;
+                                        cellButtons[cellIndex].setOnClickListener(new View.OnClickListener() {
+                                            @Override
+                                            public void onClick(View v) {
+                                                onCellButtonClick(index);
+                                            }
+                                        });
+                                    } catch (IllegalAccessException e) {
+                                        e.printStackTrace();
+                                    } catch (NoSuchFieldException e) {
+                                        e.printStackTrace();
+                                    }
+                                }
+                            } catch (IllegalAccessException e) {
+                                e.printStackTrace();
+                            } catch (NoSuchFieldException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    } catch (IllegalAccessException e) {
+                        e.printStackTrace();
+                    } catch (NoSuchFieldException e) {
+                        e.printStackTrace();
                     }
-                });
-            } catch (IllegalAccessException ex) {
-                Logger.getLogger(MainActivity.class.getName()).log(Level.SEVERE, null, ex);
-            } catch (IllegalArgumentException ex) {
-                Logger.getLogger(MainActivity.class.getName()).log(Level.SEVERE, null, ex);
-            } catch (NoSuchFieldException ex) {
-                Logger.getLogger(MainActivity.class.getName()).log(Level.SEVERE, null, ex);
-            } catch (SecurityException ex) {
-                Logger.getLogger(MainActivity.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            } catch (IllegalAccessException e) {
+                e.printStackTrace();
+            } catch (NoSuchFieldException e) {
+                e.printStackTrace();
             }
         }
     }
 
     private void setupDigitButtons() {
-        final String DIGIT_BUTTON_XML_PREFIX = "BTN_D";
+        final String DIGIT_LINE_XML_ID = "DIGIT_LINE";
+        final String DIGIT_BUTTON_XML_PREFIX = "BTN_";
         final long BUTTON_MIN_CLICK_TIME_INTERVAL_MS = 500;
 
         digitButtons = new CustomButton[GRID_ROWS + 1];
         Class rid = R.id.class;
-        for (int i = 0; i <= (GRID_ROWS); i = i + 1) {   //  10 boutons: X, 1, 2, ... 9
-            try {
-                digitButtons[i] = findViewById(rid.getField(DIGIT_BUTTON_XML_PREFIX + (i + 1)).getInt(rid));  // BTN_D1, BTN_D2, ...
-                final String value = ((i == DELETE_DIGIT_BUTTON_INDEX) ? DELETE_DIGIT_BUTTON_VALUE : String.valueOf(i));
-                digitButtons[i].setText(value);
-                digitButtons[i].setMinClickTimeInterval(BUTTON_MIN_CLICK_TIME_INTERVAL_MS);
-                final int index = i;
-                digitButtons[i].setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        onDigitButtonClick(index);
-                    }
-                });
-            } catch (IllegalAccessException ex) {
-                Logger.getLogger(MainActivity.class.getName()).log(Level.SEVERE, null, ex);
-            } catch (IllegalArgumentException ex) {
-                Logger.getLogger(MainActivity.class.getName()).log(Level.SEVERE, null, ex);
-            } catch (NoSuchFieldException ex) {
-                Logger.getLogger(MainActivity.class.getName()).log(Level.SEVERE, null, ex);
-            } catch (SecurityException ex) {
-                Logger.getLogger(MainActivity.class.getName()).log(Level.SEVERE, null, ex);
+        try {
+            LinearLayout digitLineLayout = findViewById(rid.getField(DIGIT_LINE_XML_ID).getInt(rid));
+            for (int i = 0; i <= (GRID_ROWS); i = i + 1) {   //  10 boutons: X, 1, 2, ... 9
+                try {
+                    digitButtons[i] = digitLineLayout.findViewById(rid.getField(DIGIT_BUTTON_XML_PREFIX + String.valueOf(i)).getInt(rid));
+                    final String value = ((i == DELETE_DIGIT_BUTTON_INDEX) ? DELETE_DIGIT_BUTTON_VALUE : String.valueOf(i));
+                    digitButtons[i].setText(value);
+                    digitButtons[i].setMinClickTimeInterval(BUTTON_MIN_CLICK_TIME_INTERVAL_MS);
+                    final int index = i;
+                    digitButtons[i].setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            onDigitButtonClick(index);
+                        }
+                    });
+                } catch (IllegalAccessException ex) {
+                    Logger.getLogger(MainActivity.class.getName()).log(Level.SEVERE, null, ex);
+                } catch (IllegalArgumentException ex) {
+                    Logger.getLogger(MainActivity.class.getName()).log(Level.SEVERE, null, ex);
+                } catch (NoSuchFieldException ex) {
+                    Logger.getLogger(MainActivity.class.getName()).log(Level.SEVERE, null, ex);
+                } catch (SecurityException ex) {
+                    Logger.getLogger(MainActivity.class.getName()).log(Level.SEVERE, null, ex);
+                }
             }
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        } catch (NoSuchFieldException e) {
+            e.printStackTrace();
         }
     }
 
