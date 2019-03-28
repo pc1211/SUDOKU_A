@@ -447,9 +447,9 @@ public class MainActivity extends Activity {
     }
 
     private void setupCellButtons() {
-        final String CELL_BIG_LINE_XML_PREFIX = "CELL_BIG_LINE_";
+        final String CELL_BIG_ROW_XML_PREFIX = "CELL_BIG_ROW_";
         final String CELL_SQUARE_XML_PREFIX = "CELL_SQUARE_";
-        final String CELL_SMALL_LINE_XML_PREFIX = "CELL_SMALL_LINE_";
+        final String CELL_SMALL_ROW_XML_PREFIX = "CELL_SMALL_ROW_";
         final String BUTTON_XML_PREFIX = "BTN_";
         final long BUTTON_MIN_CLICK_TIME_INTERVAL_MS = 500;
 
@@ -457,17 +457,17 @@ public class MainActivity extends Activity {
         Class rid = R.id.class;
         for (int i = 0; i <= (SQUARE_ROWS - 1); i = i + 1) {    //  3 grosses lignes dans la grille
             try {
-                LinearLayout bigLineLayout = findViewById(rid.getField(CELL_BIG_LINE_XML_PREFIX + String.valueOf(i)).getInt(rid));
+                LinearLayout bigRowLayout = findViewById(rid.getField(CELL_BIG_ROW_XML_PREFIX + String.valueOf(i)).getInt(rid));
                 for (int j = 0; j <= (SQUARE_ROWS - 1); j = j + 1) {    //  3 carrés par grosse ligne, disposés horizontalement
                     try {
-                        LinearLayout squareLayout = bigLineLayout.findViewById(rid.getField(CELL_SQUARE_XML_PREFIX + String.valueOf(j)).getInt(rid));
+                        LinearLayout squareLayout = bigRowLayout.findViewById(rid.getField(CELL_SQUARE_XML_PREFIX + String.valueOf(j)).getInt(rid));
                         for (int k = 0; k <= (SQUARE_ROWS - 1); k = k + 1) {    //  3 petites lignes par carré
                             try {
-                                LinearLayout smallLineLayout = squareLayout.findViewById(rid.getField(CELL_SMALL_LINE_XML_PREFIX + String.valueOf(k)).getInt(rid));
+                                LinearLayout smallRowLayout = squareLayout.findViewById(rid.getField(CELL_SMALL_ROW_XML_PREFIX + String.valueOf(k)).getInt(rid));
                                 for (int l = 0; l <= (SQUARE_ROWS - 1); l = l + 1) {   //  3 boutons par petite ligne, disposés horizontalement
                                     try {
                                         int cellIndex = i * SQUARE_ROWS * GRID_ROWS + k * GRID_ROWS + j * SQUARE_ROWS + l;
-                                        cellButtons[cellIndex] = smallLineLayout.findViewById(rid.getField(BUTTON_XML_PREFIX + String.valueOf(l)).getInt(rid));
+                                        cellButtons[cellIndex] = smallRowLayout.findViewById(rid.getField(BUTTON_XML_PREFIX + String.valueOf(l)).getInt(rid));
                                         cellButtons[cellIndex].setMinClickTimeInterval(BUTTON_MIN_CLICK_TIME_INTERVAL_MS);
                                         final int index = cellIndex;
                                         cellButtons[cellIndex].setOnClickListener(new View.OnClickListener() {
@@ -503,17 +503,17 @@ public class MainActivity extends Activity {
     }
 
     private void setupDigitButtons() {
-        final String DIGIT_LINE_XML_ID = "DIGIT_LINE";
+        final String DIGIT_ROW_XML_ID = "DIGIT_ROW";
         final String DIGIT_BUTTON_XML_PREFIX = "BTN_";
         final long BUTTON_MIN_CLICK_TIME_INTERVAL_MS = 500;
 
         digitButtons = new CustomButton[GRID_ROWS + 1];
         Class rid = R.id.class;
         try {
-            LinearLayout digitLineLayout = findViewById(rid.getField(DIGIT_LINE_XML_ID).getInt(rid));
+            LinearLayout digitRowLayout = findViewById(rid.getField(DIGIT_ROW_XML_ID).getInt(rid));
             for (int i = 0; i <= (GRID_ROWS); i = i + 1) {   //  10 boutons: X, 1, 2, ... 9
                 try {
-                    digitButtons[i] = digitLineLayout.findViewById(rid.getField(DIGIT_BUTTON_XML_PREFIX + String.valueOf(i)).getInt(rid));
+                    digitButtons[i] = digitRowLayout.findViewById(rid.getField(DIGIT_BUTTON_XML_PREFIX + String.valueOf(i)).getInt(rid));
                     final String value = ((i == DELETE_DIGIT_BUTTON_INDEX) ? DELETE_DIGIT_BUTTON_VALUE : String.valueOf(i));
                     digitButtons[i].setText(value);
                     digitButtons[i].setMinClickTimeInterval(BUTTON_MIN_CLICK_TIME_INTERVAL_MS);
@@ -542,17 +542,17 @@ public class MainActivity extends Activity {
     }
 
     private void setupCommandButtons() {
-        final String COMMAND_LINE_XML_ID = "COMMAND_LINE";
+        final String COMMAND_ROW_XML_ID = "COMMAND_ROW";
         final String BUTTON_COMMAND_XML_PREFIX = "BTN_";
         final long BUTTON_MIN_CLICK_TIME_INTERVAL_MS = 500;
 
         commandButtons = new CustomButton[COMMANDS.values().length];
         Class rid = R.id.class;
         try {
-            LinearLayout commandLineLayout = findViewById(rid.getField(COMMAND_LINE_XML_ID).getInt(rid));
+            LinearLayout commandRowLayout = findViewById(rid.getField(COMMAND_ROW_XML_ID).getInt(rid));
             for (COMMANDS command : COMMANDS.values()) {
                 try {
-                    commandButtons[command.INDEX()] = commandLineLayout.findViewById(rid.getField(BUTTON_COMMAND_XML_PREFIX + command.toString()).getInt(rid));
+                    commandButtons[command.INDEX()] = commandRowLayout.findViewById(rid.getField(BUTTON_COMMAND_XML_PREFIX + command.toString()).getInt(rid));
                     commandButtons[command.INDEX()].setMinClickTimeInterval(BUTTON_MIN_CLICK_TIME_INTERVAL_MS);
                     final COMMANDS fcommand = command;
                     commandButtons[command.INDEX()].setOnClickListener(new View.OnClickListener() {
