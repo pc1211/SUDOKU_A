@@ -504,7 +504,7 @@ public class MainActivity extends Activity {
 
     private void setupDigitButtons() {
         final String DIGIT_ROW_XML_ID = "DIGIT_ROW";
-        final String DIGIT_BUTTON_XML_PREFIX = "BTN_";
+        final String BUTTON_XML_PREFIX = "BTN_";
         final long BUTTON_MIN_CLICK_TIME_INTERVAL_MS = 500;
 
         digitButtons = new CustomButton[GRID_ROWS + 1];
@@ -513,7 +513,7 @@ public class MainActivity extends Activity {
             LinearLayout digitRowLayout = findViewById(rid.getField(DIGIT_ROW_XML_ID).getInt(rid));
             for (int i = 0; i <= (GRID_ROWS); i = i + 1) {   //  10 boutons: X, 1, 2, ... 9
                 try {
-                    digitButtons[i] = digitRowLayout.findViewById(rid.getField(DIGIT_BUTTON_XML_PREFIX + String.valueOf(i)).getInt(rid));
+                    digitButtons[i] = digitRowLayout.findViewById(rid.getField(BUTTON_XML_PREFIX + String.valueOf(i)).getInt(rid));
                     final String value = ((i == DELETE_DIGIT_BUTTON_INDEX) ? DELETE_DIGIT_BUTTON_VALUE : String.valueOf(i));
                     digitButtons[i].setText(value);
                     digitButtons[i].setMinClickTimeInterval(BUTTON_MIN_CLICK_TIME_INTERVAL_MS);
@@ -543,7 +543,7 @@ public class MainActivity extends Activity {
 
     private void setupCommandButtons() {
         final String COMMAND_ROW_XML_ID = "COMMAND_ROW";
-        final String BUTTON_COMMAND_XML_PREFIX = "BTN_";
+        final String BUTTON_XML_PREFIX = "BTN_";
         final long BUTTON_MIN_CLICK_TIME_INTERVAL_MS = 500;
 
         commandButtons = new CustomButton[COMMANDS.values().length];
@@ -552,7 +552,7 @@ public class MainActivity extends Activity {
             LinearLayout commandRowLayout = findViewById(rid.getField(COMMAND_ROW_XML_ID).getInt(rid));
             for (COMMANDS command : COMMANDS.values()) {
                 try {
-                    commandButtons[command.INDEX()] = commandRowLayout.findViewById(rid.getField(BUTTON_COMMAND_XML_PREFIX + command.toString()).getInt(rid));
+                    commandButtons[command.INDEX()] = commandRowLayout.findViewById(rid.getField(BUTTON_XML_PREFIX + command.toString()).getInt(rid));
                     commandButtons[command.INDEX()].setMinClickTimeInterval(BUTTON_MIN_CLICK_TIME_INTERVAL_MS);
                     final COMMANDS fcommand = command;
                     commandButtons[command.INDEX()].setOnClickListener(new View.OnClickListener() {
