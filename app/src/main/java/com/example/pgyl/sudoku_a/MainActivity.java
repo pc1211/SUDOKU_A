@@ -23,9 +23,6 @@ import com.example.pgyl.pekislib_a.HelpActivity;
 import com.example.pgyl.pekislib_a.HelpActivity.HELP_ACTIVITY_EXTRA_KEYS;
 import com.example.pgyl.pekislib_a.StringShelfDatabase;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import static com.example.pgyl.pekislib_a.Constants.BUTTON_STATES;
 import static com.example.pgyl.pekislib_a.Constants.COLOR_PREFIX;
 import static com.example.pgyl.pekislib_a.Constants.SHP_FILE_NAME_SUFFIX;
@@ -311,19 +308,15 @@ public class MainActivity extends Activity {
         for (final COMMANDS command : COMMANDS.values()) {
             if (command.equals(COMMANDS.SOLVE)) {
                 if (solver.getSolveState().equals(SOLVE_STATES.SOLUTION_FOUND)) {
-                    commandButtons[command.INDEX()].setUnpressedColor(SOLUTION_FOUND_UNPRESSED_COLOR);
-                    commandButtons[command.INDEX()].setPressedColor(SOLUTION_FOUND_PRESSED_COLOR);
+                    commandButtons[command.INDEX()].setColors(SOLUTION_FOUND_PRESSED_COLOR, SOLUTION_FOUND_UNPRESSED_COLOR);
                 }
                 if (solver.getSolveState().equals(SOLVE_STATES.IMPOSSIBLE)) {
-                    commandButtons[command.INDEX()].setUnpressedColor(IMPOSSIBLE_UNPRESSED_COLOR);
-                    commandButtons[command.INDEX()].setPressedColor(IMPOSSIBLE_PRESSED_COLOR);
+                    commandButtons[command.INDEX()].setColors(IMPOSSIBLE_PRESSED_COLOR, IMPOSSIBLE_UNPRESSED_COLOR);
                 }
                 if (solver.getSolveState().equals(SOLVE_STATES.UNKNOWN)) {
-                    commandButtons[command.INDEX()].setUnpressedColor(BUTTON_STATES.UNPRESSED.DEFAULT_COLOR());
-                    commandButtons[command.INDEX()].setPressedColor(BUTTON_STATES.PRESSED.DEFAULT_COLOR());
+                    commandButtons[command.INDEX()].setColors(BUTTON_STATES.PRESSED.DEFAULT_COLOR(), BUTTON_STATES.UNPRESSED.DEFAULT_COLOR());
                 }
             }
-            commandButtons[command.INDEX()].updateColor();
         }
     }
 
@@ -340,18 +333,14 @@ public class MainActivity extends Activity {
         final String ENABLE_EDIT_PRESSED_COLOR = "0033CC";
 
         if ((editType.equals(EDIT_TYPES.CELL)) && (index == editIndex)) {
-            cellButtons[index].setUnpressedColor(ENABLE_EDIT_UNPRESSED_COLOR);
-            cellButtons[index].setPressedColor(ENABLE_EDIT_PRESSED_COLOR);
+            cellButtons[index].setColors(ENABLE_EDIT_PRESSED_COLOR, ENABLE_EDIT_UNPRESSED_COLOR);
         } else {
             if (cells[index].isProtected()) {
-                cellButtons[index].setUnpressedColor(PROTECTED_UNPRESSED_COLOR);
-                cellButtons[index].setPressedColor(PROTECTED_PRESSED_COLOR);
+                cellButtons[index].setColors(PROTECTED_PRESSED_COLOR, PROTECTED_UNPRESSED_COLOR);
             } else {
-                cellButtons[index].setUnpressedColor(BUTTON_STATES.UNPRESSED.DEFAULT_COLOR());
-                cellButtons[index].setPressedColor(BUTTON_STATES.PRESSED.DEFAULT_COLOR());
+                cellButtons[index].setColors(BUTTON_STATES.PRESSED.DEFAULT_COLOR(), BUTTON_STATES.UNPRESSED.DEFAULT_COLOR());
             }
         }
-        cellButtons[index].updateColor();
     }
 
     private void updateDisplayCellButtonTexts() {
@@ -381,13 +370,10 @@ public class MainActivity extends Activity {
         final String NORMAL_PRESSED_COLOR = "999999";
 
         if ((editType.equals(EDIT_TYPES.DIGIT)) && (index == editIndex)) {
-            digitButtons[index].setUnpressedColor(ENABLE_EDIT_UNPRESSED_COLOR);
-            digitButtons[index].setPressedColor(ENABLE_EDIT_PRESSED_COLOR);
+            digitButtons[index].setColors(ENABLE_EDIT_PRESSED_COLOR, ENABLE_EDIT_UNPRESSED_COLOR);
         } else {
-            digitButtons[index].setUnpressedColor(NORMAL_UNPRESSED_COLOR);
-            digitButtons[index].setPressedColor(NORMAL_PRESSED_COLOR);
+            digitButtons[index].setColors(NORMAL_PRESSED_COLOR, NORMAL_UNPRESSED_COLOR);
         }
-        digitButtons[index].updateColor();
     }
 
     private void updateDisplayKeepScreenBarMenuItemIcon(boolean keepScreen) {
@@ -459,44 +445,24 @@ public class MainActivity extends Activity {
             try {
                 LinearLayout bigRowLayout = findViewById(rid.getField(CELL_BIG_ROW_XML_PREFIX + String.valueOf(i)).getInt(rid));
                 for (int j = 0; j <= (SQUARE_ROWS - 1); j = j + 1) {    //  3 carrés par grosse ligne, disposés horizontalement
-                    try {
-                        LinearLayout squareLayout = bigRowLayout.findViewById(rid.getField(CELL_SQUARE_XML_PREFIX + String.valueOf(j)).getInt(rid));
-                        for (int k = 0; k <= (SQUARE_ROWS - 1); k = k + 1) {    //  3 petites lignes par carré
-                            try {
-                                LinearLayout smallRowLayout = squareLayout.findViewById(rid.getField(CELL_SMALL_ROW_XML_PREFIX + String.valueOf(k)).getInt(rid));
-                                for (int l = 0; l <= (SQUARE_ROWS - 1); l = l + 1) {   //  3 boutons par petite ligne, disposés horizontalement
-                                    try {
-                                        int cellIndex = i * SQUARE_ROWS * GRID_ROWS + k * GRID_ROWS + j * SQUARE_ROWS + l;
-                                        cellButtons[cellIndex] = smallRowLayout.findViewById(rid.getField(BUTTON_XML_PREFIX + String.valueOf(l)).getInt(rid));
-                                        cellButtons[cellIndex].setMinClickTimeInterval(BUTTON_MIN_CLICK_TIME_INTERVAL_MS);
-                                        final int index = cellIndex;
-                                        cellButtons[cellIndex].setOnClickListener(new View.OnClickListener() {
-                                            @Override
-                                            public void onClick(View v) {
-                                                onCellButtonClick(index);
-                                            }
-                                        });
-                                    } catch (IllegalAccessException e) {
-                                        e.printStackTrace();
-                                    } catch (NoSuchFieldException e) {
-                                        e.printStackTrace();
-                                    }
+                    LinearLayout squareLayout = bigRowLayout.findViewById(rid.getField(CELL_SQUARE_XML_PREFIX + String.valueOf(j)).getInt(rid));
+                    for (int k = 0; k <= (SQUARE_ROWS - 1); k = k + 1) {    //  3 petites lignes par carré
+                        LinearLayout smallRowLayout = squareLayout.findViewById(rid.getField(CELL_SMALL_ROW_XML_PREFIX + String.valueOf(k)).getInt(rid));
+                        for (int l = 0; l <= (SQUARE_ROWS - 1); l = l + 1) {   //  3 boutons par petite ligne, disposés horizontalement
+                            int cellIndex = i * SQUARE_ROWS * GRID_ROWS + k * GRID_ROWS + j * SQUARE_ROWS + l;
+                            cellButtons[cellIndex] = smallRowLayout.findViewById(rid.getField(BUTTON_XML_PREFIX + String.valueOf(l)).getInt(rid));
+                            cellButtons[cellIndex].setMinClickTimeInterval(BUTTON_MIN_CLICK_TIME_INTERVAL_MS);
+                            final int index = cellIndex;
+                            cellButtons[cellIndex].setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+                                    onCellButtonClick(index);
                                 }
-                            } catch (IllegalAccessException e) {
-                                e.printStackTrace();
-                            } catch (NoSuchFieldException e) {
-                                e.printStackTrace();
-                            }
+                            });
                         }
-                    } catch (IllegalAccessException e) {
-                        e.printStackTrace();
-                    } catch (NoSuchFieldException e) {
-                        e.printStackTrace();
                     }
                 }
-            } catch (IllegalAccessException e) {
-                e.printStackTrace();
-            } catch (NoSuchFieldException e) {
+            } catch (IllegalAccessException | IllegalArgumentException | NoSuchFieldException | SecurityException e) {
                 e.printStackTrace();
             }
         }
@@ -512,31 +478,19 @@ public class MainActivity extends Activity {
         try {
             LinearLayout digitRowLayout = findViewById(rid.getField(DIGIT_ROW_XML_ID).getInt(rid));
             for (int i = 0; i <= (GRID_ROWS); i = i + 1) {   //  10 boutons: X, 1, 2, ... 9
-                try {
-                    digitButtons[i] = digitRowLayout.findViewById(rid.getField(BUTTON_XML_PREFIX + String.valueOf(i)).getInt(rid));
-                    final String value = ((i == DELETE_DIGIT_BUTTON_INDEX) ? DELETE_DIGIT_BUTTON_VALUE : String.valueOf(i));
-                    digitButtons[i].setText(value);
-                    digitButtons[i].setMinClickTimeInterval(BUTTON_MIN_CLICK_TIME_INTERVAL_MS);
-                    final int index = i;
-                    digitButtons[i].setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            onDigitButtonClick(index);
-                        }
-                    });
-                } catch (IllegalAccessException ex) {
-                    Logger.getLogger(MainActivity.class.getName()).log(Level.SEVERE, null, ex);
-                } catch (IllegalArgumentException ex) {
-                    Logger.getLogger(MainActivity.class.getName()).log(Level.SEVERE, null, ex);
-                } catch (NoSuchFieldException ex) {
-                    Logger.getLogger(MainActivity.class.getName()).log(Level.SEVERE, null, ex);
-                } catch (SecurityException ex) {
-                    Logger.getLogger(MainActivity.class.getName()).log(Level.SEVERE, null, ex);
-                }
+                digitButtons[i] = digitRowLayout.findViewById(rid.getField(BUTTON_XML_PREFIX + String.valueOf(i)).getInt(rid));
+                final String value = ((i == DELETE_DIGIT_BUTTON_INDEX) ? DELETE_DIGIT_BUTTON_VALUE : String.valueOf(i));
+                digitButtons[i].setText(value);
+                digitButtons[i].setMinClickTimeInterval(BUTTON_MIN_CLICK_TIME_INTERVAL_MS);
+                final int index = i;
+                digitButtons[i].setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        onDigitButtonClick(index);
+                    }
+                });
             }
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        } catch (NoSuchFieldException e) {
+        } catch (IllegalAccessException | IllegalArgumentException | NoSuchFieldException | SecurityException e) {
             e.printStackTrace();
         }
     }
@@ -551,29 +505,17 @@ public class MainActivity extends Activity {
         try {
             LinearLayout commandRowLayout = findViewById(rid.getField(COMMAND_ROW_XML_ID).getInt(rid));
             for (COMMANDS command : COMMANDS.values()) {
-                try {
-                    commandButtons[command.INDEX()] = commandRowLayout.findViewById(rid.getField(BUTTON_XML_PREFIX + command.toString()).getInt(rid));
-                    commandButtons[command.INDEX()].setMinClickTimeInterval(BUTTON_MIN_CLICK_TIME_INTERVAL_MS);
-                    final COMMANDS fcommand = command;
-                    commandButtons[command.INDEX()].setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            onCommandButtonClick(fcommand);
-                        }
-                    });
-                } catch (IllegalAccessException ex) {
-                    Logger.getLogger(MainActivity.class.getName()).log(Level.SEVERE, null, ex);
-                } catch (IllegalArgumentException ex) {
-                    Logger.getLogger(MainActivity.class.getName()).log(Level.SEVERE, null, ex);
-                } catch (NoSuchFieldException ex) {
-                    Logger.getLogger(MainActivity.class.getName()).log(Level.SEVERE, null, ex);
-                } catch (SecurityException ex) {
-                    Logger.getLogger(MainActivity.class.getName()).log(Level.SEVERE, null, ex);
-                }
+                commandButtons[command.INDEX()] = commandRowLayout.findViewById(rid.getField(BUTTON_XML_PREFIX + command.toString()).getInt(rid));
+                commandButtons[command.INDEX()].setMinClickTimeInterval(BUTTON_MIN_CLICK_TIME_INTERVAL_MS);
+                final COMMANDS fcommand = command;
+                commandButtons[command.INDEX()].setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        onCommandButtonClick(fcommand);
+                    }
+                });
             }
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        } catch (NoSuchFieldException e) {
+        } catch (IllegalAccessException | IllegalArgumentException | SecurityException | NoSuchFieldException e) {
             e.printStackTrace();
         }
     }
@@ -612,14 +554,8 @@ public class MainActivity extends Activity {
         Class rid = R.id.class;
         try {
             barMenuItemKeepScreen = menu.findItem(rid.getField(BAR_MENU_ITEM_KEEP_SCREEN_NAME).getInt(rid));
-        } catch (IllegalAccessException ex) {
-            Logger.getLogger(MainActivity.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (IllegalArgumentException ex) {
-            Logger.getLogger(MainActivity.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (NoSuchFieldException ex) {
-            Logger.getLogger(MainActivity.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (SecurityException ex) {
-            Logger.getLogger(MainActivity.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IllegalAccessException | IllegalArgumentException | NoSuchFieldException | SecurityException e) {
+            e.printStackTrace();
         }
     }
 
